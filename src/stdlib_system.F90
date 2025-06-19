@@ -83,7 +83,22 @@ public :: wait
 public :: kill
 public :: elapsed
 public :: is_windows
-     
+
+!! Public path related functions and interfaces
+#ifdef WINDOWS
+    character(len=1), parameter, public :: pathsep = '\'
+    logical, parameter, public :: ISWIN = .true.
+#else
+    character(len=1), parameter, public :: pathsep = '/'
+    logical, parameter, public :: ISWIN = .false.
+#endif
+
+public :: join_path
+public :: operator(/)
+public :: split_path
+public :: base_name
+public :: dir_name
+
 !! version: experimental
 !!
 !! Tests if a given path matches an existing directory.
@@ -197,45 +212,6 @@ contains
     procedure :: pid          => process_get_ID
     
 end type process_type
-
-! For Fileystem related error handling
-type, public :: fs_error
-    ! the status code returned by C-functions or 
-    ! global variables like `errno` etc whenever called
-    ! When no C interface is involved but there is an error it is set to -1
-    integer :: code = 0
-
-    ! A user friendly message about the error
-    character(len=128) :: message = repeat(' ', 128)
-
-contains
-    ! resets the error state
-    procedure :: destroy => fs_error_destroy
-
-    ! returns the formatted error message
-    procedure :: print => fs_error_message
-
-    !> properties
-    procedure :: ok        => fs_error_is_ok
-    procedure :: error     => fs_error_is_error
-
-    !> Handle optional error message
-    procedure :: handle    => fs_error_handling
-
-end type fs_error
-
-interface operator(==)
-    module procedure code_eq_err
-    module procedure err_eq_code
-end interface operator(==)
-
-interface operator(/=)
-    module procedure code_neq_err
-    module procedure err_neq_code
-end interface operator(/=)
-
-public :: operator(==)
-public :: operator(/=)
 
 interface runasync
     !! version: experimental
@@ -589,6 +565,87 @@ interface
     
 end interface 
 
+interface join_path
+    !! version: experimental
+    !!
+    !!### Summary
+    !! join the paths provided according to the OS-specific path-separator
+    !! ([Specification](../page/specs/stdlib_system.html#join_path))
+    !!
+    module pure function join2(p1, p2) result(path)
+        character(:), allocatable :: path
+        character(*), intent(in) :: p1, p2
+    end function join2
+
+    module pure function joinarr(p) result(path)
+        character(:), allocatable :: path
+        character(*), intent(in) :: p(:)
+    end function joinarr
+end interface join_path
+
+interface operator(/)
+    !! version: experimental
+    !!
+    !!### Summary
+    !! A binary operator to join the paths provided according to the OS-specific path-separator
+    !! ([Specification](../page/specs/stdlib_system.html#operator(/)))
+    !!
+    module pure function join_op(p1, p2) result(path)
+        character(:), allocatable :: path
+        character(*), intent(in) :: p1, p2
+    end function join_op
+end interface operator(/)
+
+interface split_path
+    !! version: experimental
+    !!
+    !!### Summary
+    !! splits the path immediately following the final path-separator
+    !! separating into typically a directory and a file name.
+    !! ([Specification](../page/specs/stdlib_system.html#split_path))
+    !!
+    !!### Description
+    !! If the path is empty `head`='.' and tail=''
+    !! If the path only consists of separators, `head` is set to the separator and tail is empty
+    !! If the path is a root directory, `head` is set to that directory and tail is empty
+    !! `head` ends with a path-separator iff the path appears to be a root directory or a child of the root directory
+    module subroutine split_path(p, head, tail)
+        character(*), intent(in) :: p
+        character(:), allocatable, intent(out) :: head, tail
+    end subroutine split_path
+end interface split_path
+
+interface base_name
+    !! version: experimental
+    !!
+    !!### Summary
+    !! returns the base name (last component) of the provided path
+    !! ([Specification](../page/specs/stdlib_system.html#base_name))
+    !!
+    !!### Description
+    !! The value returned is the `tail` of the interface `split_path`
+    module function base_name(p) result(base)
+        character(:), allocatable :: base
+        character(*), intent(in) :: p
+    end function base_name
+end interface base_name
+
+interface dir_name
+    !! version: experimental
+    !!
+    !!### Summary
+    !! returns everything but the last component of the provided path
+    !! ([Specification](../page/specs/stdlib_system.html#dir_name))
+    !!
+    !!### Description
+    !! The value returned is the `head` of the interface `split_path`
+    module function dir_name(p) result(base)
+        character(:), allocatable :: base
+        character(*), intent(in) :: p
+    end function dir_name
+end interface dir_name
+
+
 contains
 
 integer function get_runtime_os() result(os)
@@ -808,78 +865,5 @@ subroutine delete_file(path, err)
         return              
     end if
 end subroutine delete_file
-
-elemental subroutine fs_error_destroy(this)
-    class(fs_error), intent(inout) :: this
-
-    this%code = 0
-    this%message = repeat(' ', len(this%message))
-end subroutine fs_error_destroy
-
-pure function fs_error_message(this) result(msg)
-    class(fs_error), intent(in) :: this
-    character(len=:), allocatable :: msg
-    character(len=7) :: tmp ! should be more than enough
-
-    if (this%code == 0) then
-        msg = 'No Error!'
-    else
-        write(tmp, '(i0)') this%code
-        msg = 'Filesystem Error, code '//trim(tmp)//': '// trim(this%message)
-    end if
-end function fs_error_message
-
-elemental function fs_error_is_ok(this) result(is_ok)
-    class(fs_error), intent(in) :: this
-    logical :: is_ok
-    is_ok = this%code == 0
-end function fs_error_is_ok
-
-elemental function fs_error_is_error(this) result(is_err)
-    class(fs_error), intent(in) :: this
-    logical :: is_err
-    is_err = this%code /= 0
-end function fs_error_is_error
-
-pure subroutine fs_error_handling(err,err_out)
-    class(fs_error), intent(in) :: err
-    class(fs_error), optional, intent(inout) :: err_out
-
-    character(len=:),allocatable :: err_msg
-
-    if (present(err_out)) then
-        ! copy err into err_out
-        err_out%code = err%code
-        err_out%message = err%message
-    else if (err%error()) then
-        ! stop the program
-        err_msg = err%print()
-        error stop err_msg
-    end if
-end subroutine fs_error_handling
-
-pure logical function code_eq_err(code, err)
-    integer, intent(in) :: code
-    type(fs_error), intent(in) :: err
-    code_eq_err = code == err%code
-end function code_eq_err
-
-pure logical function err_eq_code(err, code)
-    integer, intent(in):: code
-    type(fs_error), intent(in) :: err
-    err_eq_code = code == err%code
-end function err_eq_code
-
-pure logical function code_neq_err(code, err)
-    integer, intent(in) :: code
-    type(fs_error), intent(in) :: err
-    code_neq_err = code /= err%code
-end function code_neq_err
-
-pure logical function err_neq_code(err, code)
-    integer, intent(in) :: code
-    type(fs_error), intent(in) :: err
-    err_neq_code = code /= err%code
-end function err_neq_code
 
 end module stdlib_system
