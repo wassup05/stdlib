@@ -43,8 +43,8 @@ contains
             call checkpath(error, 'join_path', 'C:\Users\Bob\Pictures\2025', path)
             if (allocated(error)) return
 
-            path = join_path('C:\Users\John Doe', 'Pictures\2025') ! path with spaces
-            call checkpath(error, 'join_path', 'C:\Users\John Doe\Pictures\2025', path)
+            path = join_path('"C:\Users\John Doe"', 'Pictures\2025') ! path with spaces
+            call checkpath(error, 'join_path', '"C:\Users\John Doe"\Pictures\2025', path)
             if (allocated(error)) return
         else
             path = join_path('/home', 'Alice')
