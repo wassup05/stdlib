@@ -2,7 +2,7 @@ module stdlib_system
 use, intrinsic :: iso_c_binding, only : c_int, c_long, c_ptr, c_null_ptr, c_int64_t, c_size_t, &
     c_f_pointer
 use stdlib_kinds, only: int64, dp, c_bool, c_char
-use stdlib_strings, only: to_c_char, to_string
+use stdlib_strings, only: to_c_char
 use stdlib_error, only: state_type, STDLIB_SUCCESS, STDLIB_FS_ERROR
 implicit none
 private
@@ -83,7 +83,15 @@ public :: wait
 public :: kill
 public :: elapsed
 public :: is_windows
-     
+
+!! Public path related functions and interfaces
+public :: path_sep
+public :: join_path
+public :: operator(/)
+public :: split_path
+public :: base_name
+public :: dir_name
+
 !! version: experimental
 !!
 !! Tests if a given path matches an existing directory.
@@ -99,36 +107,6 @@ public :: is_windows
 !! Windows, and various UNIX-like environments. On unsupported operating systems, the function will return `.false.`.
 !!
 public :: is_directory
-
-!! version: experimental
-!!
-!! Makes an empty directory.
-!! ([Specification](../page/specs/stdlib_system.html#make_directory))
-!!
-!! ### Summary
-!! Creates an empty directory with particular permissions.
-!!
-!! ### Description
-!! This function makes an empty directory according to the path provided.
-!! Relative paths as well as on Windows paths involving either `/` or `\` are accepted
-!! appropriate error message is returned whenever any error occur.
-!!
-public :: make_directory
-
-!! version: experimental
-!!
-!! Removes an empty directory.
-!! ([Specification](../page/specs/stdlib_system.html#remove_directory))
-!!
-!! ### Summary
-!! Deletes an empty directory.
-!!
-!! ### Description
-!! This function deletes an empty directory according to the path provided.
-!! Relative paths as well as on Windows paths involving either `/` or `\` are accepted.
-!! appropriate error message is returned whenever any error occur.
-!!
-public :: remove_directory
 
 !! version: experimental
 !!
@@ -580,6 +558,87 @@ interface
     
 end interface 
 
+interface join_path
+    !! version: experimental
+    !!
+    !!### Summary
+    !! join the paths provided according to the OS-specific path-separator
+    !! ([Specification](../page/specs/stdlib_system.html#join_path))
+    !!
+    module function join2(p1, p2) result(path)
+        character(:), allocatable :: path
+        character(*), intent(in) :: p1, p2
+    end function join2
+
+    module function joinarr(p) result(path)
+        character(:), allocatable :: path
+        character(*), intent(in) :: p(:)
+    end function joinarr
+end interface join_path
+
+interface operator(/)
+    !! version: experimental
+    !!
+    !!### Summary
+    !! A binary operator to join the paths provided according to the OS-specific path-separator
+    !! ([Specification](../page/specs/stdlib_system.html#operator(/)))
+    !!
+    module function join_op(p1, p2) result(path)
+        character(:), allocatable :: path
+        character(*), intent(in) :: p1, p2
+    end function join_op
+end interface operator(/)
+
+interface split_path
+    !! version: experimental
+    !!
+    !!### Summary
+    !! splits the path immediately following the final path-separator
+    !! separating into typically a directory and a file name.
+    !! ([Specification](../page/specs/stdlib_system.html#split_path))
+    !!
+    !!### Description
+    !! If the path is empty `head`='.' and tail=''
+    !! If the path only consists of separators, `head` is set to the separator and tail is empty
+    !! If the path is a root directory, `head` is set to that directory and tail is empty
+    !! `head` ends with a path-separator iff the path appears to be a root directory or a child of the root directory
+    module subroutine split_path(p, head, tail)
+        character(*), intent(in) :: p
+        character(:), allocatable, intent(out) :: head, tail
+    end subroutine split_path
+end interface split_path
+
+interface base_name
+    !! version: experimental
+    !!
+    !!### Summary
+    !! returns the base name (last component) of the provided path
+    !! ([Specification](../page/specs/stdlib_system.html#base_name))
+    !!
+    !!### Description
+    !! The value returned is the `tail` of the interface `split_path`
+    module function base_name(p) result(base)
+        character(:), allocatable :: base
+        character(*), intent(in) :: p
+    end function base_name
+end interface base_name
+
+interface dir_name
+    !! version: experimental
+    !!
+    !!### Summary
+    !! returns everything but the last component of the provided path
+    !! ([Specification](../page/specs/stdlib_system.html#dir_name))
+    !!
+    !!### Description
+    !! The value returned is the `head` of the interface `split_path`
+    module function dir_name(p) result(base)
+        character(:), allocatable :: base
+        character(*), intent(in) :: p
+    end function dir_name
+end interface dir_name
+
+
 contains
 
 integer function get_runtime_os() result(os)
@@ -720,96 +779,6 @@ logical function is_directory(path)
     
 end function is_directory
 
-function c_get_strerror() result(str)
-    character(len=:), allocatable :: str
-
-    interface
-        type(c_ptr) function strerror(len) bind(C, name='stdlib_strerror')
-            import c_size_t, c_ptr
-            implicit none
-            integer(c_size_t), intent(out) :: len
-        end function strerror
-    end interface
-
-    type(c_ptr) :: c_str_ptr
-    integer(c_size_t) :: len, i
-    character(kind=c_char), pointer :: c_str(:)
-
-    c_str_ptr = strerror(len)
-
-    call c_f_pointer(c_str_ptr, c_str, [len])
-
-    allocate(character(len=len) :: str)
-
-    do concurrent (i=1:len)
-        str(i:i) = c_str(i)
-    end do
-end function c_get_strerror
-
-!! makes an empty directory
-subroutine make_directory(path, mode, err)
-    character(len=*), intent(in) :: path
-    integer, intent(in), optional :: mode
-    type(state_type), optional, intent(out) :: err
-
-    integer :: code
-    type(state_type) :: err0
-
-
-    interface
-        integer function stdlib_make_directory(cpath, cmode) bind(C, name='stdlib_make_directory')
-            import c_char
-            character(kind=c_char), intent(in) :: cpath(*)
-            integer, intent(in) :: cmode
-        end function stdlib_make_directory
-    end interface
-
-    if (is_windows() .and. present(mode)) then
-        ! _mkdir() doesn't have a `mode` argument
-        err0 = state_type(STDLIB_FS_ERROR, "mode argument not present for Windows")
-        call err0%handle(err)
-        return
-    end if
-
-    code = stdlib_make_directory(to_c_char(trim(path)), mode)
-
-    select case (code)
-        case (0)
-            return
-        case default
-            ! error
-            err0 = state_type(STDLIB_FS_ERROR, "code:", to_string(code)//',', c_get_strerror())
-            call err0%handle(err)
-    end select
-end subroutine make_directory
-
-!! Removes an empty directory
-subroutine remove_directory(path, err)
-    character(len=*), intent(in) :: path
-    type(state_type), optional, intent(out) :: err
-
-    integer :: code
-    type(state_type) :: err0
-
-    interface
-        integer function stdlib_remove_directory(cpath) bind(C, name='stdlib_remove_directory')
-            import c_char
-            character(kind=c_char), intent(in) :: cpath(*)
-        end function stdlib_remove_directory
-    end interface
-
-    code = stdlib_remove_directory(to_c_char(trim(path)))
-
-    select case (code)
-        case (0)
-            return
-        case default
-            ! error
-            err0 = state_type(STDLIB_FS_ERROR, "code:", to_string(code)//',', c_get_strerror())
-            call err0%handle(err)
-    end select
-end subroutine remove_directory
-
 !> Returns the file path of the null device for the current operating system.
 !>
 !> Version: Helper function.
@@ -889,5 +858,13 @@ subroutine delete_file(path, err)
         return              
     end if
 end subroutine delete_file
+
+character function path_sep()
+    if (OS_TYPE() == OS_WINDOWS) then
+        path_sep = '\'
+    else
+        path_sep = '/'
+    end if
+end function path_sep
 
 end module stdlib_system
