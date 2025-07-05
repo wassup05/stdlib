@@ -2,7 +2,6 @@ submodule (stdlib_linalg) stdlib_linalg_least_squares
 !! Least-squares solution to Ax=b
      use stdlib_linalg_constants
      use stdlib_linalg_lapack, only: gelsd, stdlib_ilaenv
-     use stdlib_linalg_lapack_aux, only: handle_gelsd_info
      use stdlib_linalg_state, only: linalg_state_type, linalg_error_handling, LINALG_ERROR, &
          LINALG_INTERNAL_ERROR, LINALG_VALUE_ERROR
      implicit none
@@ -10,6 +9,25 @@ submodule (stdlib_linalg) stdlib_linalg_least_squares
      character(*), parameter :: this = 'lstsq'
 
      contains
+
+     elemental subroutine handle_gelsd_info(info,lda,n,ldb,nrhs,err)
+          integer(ilp), intent(in) :: info,lda,n,ldb,nrhs
+          type(linalg_state_type), intent(out) :: err
+
+          ! Process output
+          select case (info)
+             case (0)
+                 ! Success
+             case (:-1)
+                 err = linalg_state_type(this,LINALG_VALUE_ERROR,'invalid problem size a=',[lda,n], &
+                                                                                    ', b=',[ldb,nrhs])
+             case (1:)
+                 err = linalg_state_type(this,LINALG_ERROR,'SVD did not converge.')
+             case default
+                 err = linalg_state_type(this,LINALG_INTERNAL_ERROR,'catastrophic error')
+          end select
+
+      end subroutine handle_gelsd_info
 
      ! Workspace needed by gelsd
      elemental subroutine sgelsd_space(m,n,nrhs,lrwork,liwork,lcwork)
@@ -367,7 +385,7 @@ submodule (stdlib_linalg) stdlib_linalg_least_squares
             acond = singular(1)/singular(mnmin)
 
             ! Process output
-            call handle_gelsd_info(this,info,lda,n,ldb,nrhs,err0)
+            call handle_gelsd_info(info,lda,n,ldb,nrhs,err0)
          
          endif           
                   
@@ -609,7 +627,7 @@ submodule (stdlib_linalg) stdlib_linalg_least_squares
             acond = singular(1)/singular(mnmin)
 
             ! Process output
-            call handle_gelsd_info(this,info,lda,n,ldb,nrhs,err0)
+            call handle_gelsd_info(info,lda,n,ldb,nrhs,err0)
          
          endif           
                   
@@ -863,7 +881,7 @@ submodule (stdlib_linalg) stdlib_linalg_least_squares
             acond = singular(1)/singular(mnmin)
 
             ! Process output
-            call handle_gelsd_info(this,info,lda,n,ldb,nrhs,err0)
+            call handle_gelsd_info(info,lda,n,ldb,nrhs,err0)
          
          endif           
                   
@@ -1118,7 +1136,7 @@ submodule (stdlib_linalg) stdlib_linalg_least_squares
             acond = singular(1)/singular(mnmin)
 
             ! Process output
-            call handle_gelsd_info(this,info,lda,n,ldb,nrhs,err0)
+            call handle_gelsd_info(info,lda,n,ldb,nrhs,err0)
          
          endif           
                   
@@ -1361,7 +1379,7 @@ submodule (stdlib_linalg) stdlib_linalg_least_squares
             acond = singular(1)/singular(mnmin)
 
             ! Process output
-            call handle_gelsd_info(this,info,lda,n,ldb,nrhs,err0)
+            call handle_gelsd_info(info,lda,n,ldb,nrhs,err0)
          
          endif           
                   
@@ -1603,7 +1621,7 @@ submodule (stdlib_linalg) stdlib_linalg_least_squares
             acond = singular(1)/singular(mnmin)
 
             ! Process output
-            call handle_gelsd_info(this,info,lda,n,ldb,nrhs,err0)
+            call handle_gelsd_info(info,lda,n,ldb,nrhs,err0)
          
          endif           
                   
@@ -1857,7 +1875,7 @@ submodule (stdlib_linalg) stdlib_linalg_least_squares
             acond = singular(1)/singular(mnmin)
 
             ! Process output
-            call handle_gelsd_info(this,info,lda,n,ldb,nrhs,err0)
+            call handle_gelsd_info(info,lda,n,ldb,nrhs,err0)
          
          endif           
                   
@@ -2112,7 +2130,7 @@ submodule (stdlib_linalg) stdlib_linalg_least_squares
             acond = singular(1)/singular(mnmin)
 
             ! Process output
-            call handle_gelsd_info(this,info,lda,n,ldb,nrhs,err0)
+            call handle_gelsd_info(info,lda,n,ldb,nrhs,err0)
          
          endif           
                   

@@ -71,9 +71,7 @@ submodule(stdlib_linalg) stdlib_linalg_pseudoinverse
          ! Get pseudo-inverse: A_pinv = V * (diag(1/s) * U^H) = V * (U * diag(1/s))^H
          
          ! 1) compute (U * diag(1/s)) in-place
-         do concurrent (i=1:m,j=1:k)
-            u(i,j) = s(j)*u(i,j)
-         end do
+         do concurrent (i=1:m,j=1:k); u(i,j) = s(j)*u(i,j); end do
             
          ! 2) commutate matmul: A_pinv = V * (U * diag(1/s))^H = ((U * diag(1/s)) * V^H)^H. 
          !    This avoids one matrix transpose
@@ -181,9 +179,7 @@ submodule(stdlib_linalg) stdlib_linalg_pseudoinverse
          ! Get pseudo-inverse: A_pinv = V * (diag(1/s) * U^H) = V * (U * diag(1/s))^H
          
          ! 1) compute (U * diag(1/s)) in-place
-         do concurrent (i=1:m,j=1:k)
-            u(i,j) = s(j)*u(i,j)
-         end do
+         do concurrent (i=1:m,j=1:k); u(i,j) = s(j)*u(i,j); end do
             
          ! 2) commutate matmul: A_pinv = V * (U * diag(1/s))^H = ((U * diag(1/s)) * V^H)^H. 
          !    This avoids one matrix transpose
@@ -291,9 +287,7 @@ submodule(stdlib_linalg) stdlib_linalg_pseudoinverse
          ! Get pseudo-inverse: A_pinv = V * (diag(1/s) * U^H) = V * (U * diag(1/s))^H
          
          ! 1) compute (U * diag(1/s)) in-place
-         do concurrent (i=1:m,j=1:k)
-            u(i,j) = s(j)*u(i,j)
-         end do
+         do concurrent (i=1:m,j=1:k); u(i,j) = s(j)*u(i,j); end do
             
          ! 2) commutate matmul: A_pinv = V * (U * diag(1/s))^H = ((U * diag(1/s)) * V^H)^H. 
          !    This avoids one matrix transpose
@@ -402,9 +396,7 @@ submodule(stdlib_linalg) stdlib_linalg_pseudoinverse
          ! Get pseudo-inverse: A_pinv = V * (diag(1/s) * U^H) = V * (U * diag(1/s))^H
          
          ! 1) compute (U * diag(1/s)) in-place
-         do concurrent (i=1:m,j=1:k)
-            u(i,j) = s(j)*u(i,j)
-         end do
+         do concurrent (i=1:m,j=1:k); u(i,j) = s(j)*u(i,j); end do
             
          ! 2) commutate matmul: A_pinv = V * (U * diag(1/s))^H = ((U * diag(1/s)) * V^H)^H. 
          !    This avoids one matrix transpose
