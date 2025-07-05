@@ -434,7 +434,7 @@ contains
 !!             greater than max_bits
 !
         class(chaining_hashmap_type), intent(out)  :: map
-        procedure(hasher_fun), optional            :: hasher
+        procedure(hasher_fun)                      :: hasher
         integer, intent(in), optional              :: slots_bits
         integer(int32), intent(out), optional      :: status
 
@@ -448,9 +448,8 @@ contains
         map % probe_count = 0
         map % total_probes = 0
 
-        ! Check if user has specified a hasher other than the default hasher.
-        if (present(hasher)) map % hasher => hasher      
-            
+        map % hasher => hasher
+
         call free_chaining_map( map )
 
         if ( present(slots_bits) ) then
@@ -503,8 +502,6 @@ contains
 
         call extend_map_entry_pool(map)
 
-        map % initialized = .true.
-        
         if (present(status) ) status = success
 
     end subroutine init_chaining_map
@@ -548,9 +545,6 @@ contains
         type(chaining_map_entry_type), pointer :: gentry, pentry, sentry
         character(*), parameter :: procedure = 'MAP_ENTRY'
 
-        ! Check that map is initialized.  
-        if (.not. map % initialized) call init_chaining_map( map )
-        
         hash_val = map % hasher( key )
 
         if ( map % probe_count > map_probe_factor * map % call_count ) then
