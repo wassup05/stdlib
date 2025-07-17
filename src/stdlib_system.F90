@@ -782,10 +782,9 @@ subroutine delete_file(path, err)
     end if
 end subroutine delete_file
 
-pure function fs_error_code(code,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10, & 
+type(state_type) pure function fs_error_code(code,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10, & 
         a11,a12,a13,a14,a15,a16,a17,a18) result(state)
 
-    type(state_type) :: state
     !> Platform specific error code
     integer, intent(in) :: code
     !> Optional rank-agnostic arguments
@@ -796,10 +795,9 @@ pure function fs_error_code(code,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10, &
         a9,a10,a11,a12,a13,a14,a15,a16,a17,a18)
 end function fs_error_code
 
-pure function fs_error(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11, &
+type(state_type) pure function fs_error(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11, &
         a12,a13,a14,a15,a16,a17,a18,a19,a20) result(state)
 
-    type(state_type) :: state
     !> Optional rank-agnostic arguments
     class(*), intent(in), optional, dimension(..) :: a1,a2,a3,a4,a5,a6,a7,a8,a9,a10, &
         a11,a12,a13,a14,a15,a16,a17,a18,a19,a20
