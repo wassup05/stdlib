@@ -144,7 +144,7 @@ public :: fs_error
 !! A helper function for returning the `type(state_type)` with the flag `STDLIB_FS_ERROR` set.
 !! It also formats and prefixes the `code` passed to it as the first argument
 !!
-public :: fs_error_code
+! public :: fs_error_code
      
 ! CPU clock ticks storage
 integer, parameter, private :: TICKS = int64
@@ -782,18 +782,22 @@ subroutine delete_file(path, err)
     end if
 end subroutine delete_file
 
-type(state_type) pure function fs_error_code(code,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10, & 
-        a11,a12,a13,a14,a15,a16,a17,a18) result(state)
-
-    !> Platform specific error code
-    integer, intent(in) :: code
-    !> Optional rank-agnostic arguments
-    class(*), intent(in), optional, dimension(..) :: a1,a2,a3,a4,a5,a6,a7,a8,a9,a10, &
-        a11,a12,a13,a14,a15,a16,a17,a18
-
-    state = state_type(STDLIB_FS_ERROR, "code -", to_string(code)//",",a1,a2,a3,a4,a5,a6,a7,a8, & 
-        a9,a10,a11,a12,a13,a14,a15,a16,a17,a18)
-end function fs_error_code
+! type(state_type) pure function fs_error_code(code,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10, & 
+!         a11,a12,a13,a14,a15,a16,a17,a18) result(state)
+!
+!     !> Platform specific error code
+!     integer, intent(in) :: code
+!     !> Optional rank-agnostic arguments
+!     class(*), intent(in), optional, dimension(..) :: a1,a2,a3,a4,a5,a6,a7,a8,a9,a10, &
+!         a11,a12,a13,a14,a15,a16,a17,a18
+!
+!     character(:), allocatable :: code_str 
+!
+!     code_str = to_string(code)
+!
+!     state = state_type(STDLIB_FS_ERROR, "code -", code_str//",",a1,a2,a3,a4,a5,a6,a7,a8, & 
+!         a9,a10,a11,a12,a13,a14,a15,a16,a17,a18)
+! end function fs_error_code
 
 type(state_type) pure function fs_error(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11, &
         a12,a13,a14,a15,a16,a17,a18,a19,a20) result(state)
