@@ -791,11 +791,7 @@ type(state_type) pure function fs_error_code(code,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10
     class(*), intent(in), optional, dimension(..) :: a1,a2,a3,a4,a5,a6,a7,a8,a9,a10, &
         a11,a12,a13,a14,a15,a16,a17,a18
 
-    character(:), allocatable :: code_str 
-
-    code_str = "hi"
-
-    state = state_type(STDLIB_FS_ERROR, "code -", code_str//",",a1,a2,a3,a4,a5,a6,a7,a8, & 
+    state = state_type(STDLIB_FS_ERROR, "code -",code,a1,a2,a3,a4,a5,a6,a7,a8, & 
         a9,a10,a11,a12,a13,a14,a15,a16,a17,a18)
 end function fs_error_code
 
