@@ -1,6 +1,6 @@
 module test_filesystem
     use testdrive, only : new_unittest, unittest_type, error_type, check, skip_test
-    use stdlib_system, only: is_directory, delete_file, fs_error
+    use stdlib_system, only: is_directory, delete_file, fs_error, fs_error_code
     use stdlib_error, only: state_type, STDLIB_FS_ERROR
 
     implicit none
@@ -27,12 +27,12 @@ contains
         type(state_type) :: s1, s2
         character(:), allocatable :: msg
 
-        ! msg = "code - 10, Cannot create File temp.txt - File already exists"
-        ! s1 = fs_error_code(10, "Cannot create File temp.txt -", "File already exists")
-        !
-        ! call check(error, s1%state == STDLIB_FS_ERROR .and. s1%message == msg, &
-        !     "fs_error_code: Could not construct the state with code correctly")
-        ! if (allocated(error)) return
+        msg = "code - 10, Cannot create File temp.txt - File already exists"
+        s1 = fs_error_code(10, "Cannot create File temp.txt -", "File already exists")
+
+        call check(error, s1%state == STDLIB_FS_ERROR .and. s1%message == msg, &
+            "fs_error_code: Could not construct the state with code correctly")
+        if (allocated(error)) return
 
         msg = "Cannot create File temp.txt - File already exists"
         s2 = fs_error("Cannot create File temp.txt -", "File already exists")
