@@ -2,8 +2,9 @@ module stdlib_system
 use, intrinsic :: iso_c_binding, only : c_int, c_long, c_ptr, c_null_ptr, c_int64_t, c_size_t, &
     c_f_pointer
 use stdlib_kinds, only: int64, dp, c_bool, c_char
-use stdlib_strings, only: to_c_char, to_string
+use stdlib_strings, only: to_c_char, ends_with
 use stdlib_string_type, only: string_type
+use stdlib_optval, only: optval
 use stdlib_error, only: state_type, STDLIB_SUCCESS, STDLIB_FS_ERROR
 implicit none
 private
@@ -115,12 +116,12 @@ public :: is_directory
 !! ([Specification](../page/specs/stdlib_system.html#make_directory))
 !!
 !! ### Summary
-!! Creates an empty directory with particular permissions.
+!! Creates an empty directory with default permissions.
 !!
 !! ### Description
 !! This function makes an empty directory according to the path provided.
-!! Relative paths as well as on Windows paths involving either `/` or `\` are accepted
-!! appropriate error message is returned whenever any error occur.
+!! Relative paths as well as on Windows, paths involving either `/` or `\` are accepted.
+!! Appropriate error message is returned whenever any error occurs.
 !!
 public :: make_directory
 
@@ -130,40 +131,14 @@ public :: make_directory
 !! ([Specification](../page/specs/stdlib_system.html#remove_directory))
 !!
 !! ### Summary
-!! Deletes an empty directory.
+!! Removes an empty directory.
 !!
 !! ### Description
-!! This function deletes an empty directory according to the path provided.
+!! This function Removes an empty directory according to the path provided.
 !! Relative paths as well as on Windows paths involving either `/` or `\` are accepted.
-!! appropriate error message is returned whenever any error occur.
+!! Appropriate error message is returned whenever any error occurs.
 !!
 public :: remove_directory
-
-!! version: experimental
-!!
-!! Gets the current working directory of the process
-!! ([Specification](../page/specs/stdlib_system.html#get_cwd))
-!!
-!! ### Summary
-!! Gets the current working directory.
-!!
-!! ### Description
-!! This subroutine gets the current working directory of the process calling this function.
-!!
-public :: get_cwd
-
-!! version: experimental
-!!
-!! Sets the current working directory of the process
-!! ([Specification](../page/specs/stdlib_system.html#set_cwd))
-!!
-!! ### Summary
-!! Changes the current working directory to the one specified.
-!!
-!! ### Description
-!! This subroutine sets the current working directory of the process calling this function to the one specified.
-!!
-public :: set_cwd
 
 !! version: experimental
 !!
@@ -905,6 +880,9 @@ logical function is_directory(path)
     
 end function is_directory
 
+! A helper function to get the result of the C function `strerror`.
+! `strerror` is a function provided by `<string.h>`. 
+! It returns a string describing the meaning of `errno` in the C header `<errno.h>`
 function c_get_strerror() result(str)
     character(len=:), allocatable :: str
 
@@ -932,40 +910,27 @@ function c_get_strerror() result(str)
 end function c_get_strerror
 
 !! makes an empty directory
-subroutine make_directory(path, mode, err)
+subroutine make_directory(path, err)
     character(len=*), intent(in) :: path
-    integer, intent(in), optional :: mode
     type(state_type), optional, intent(out) :: err
 
     integer :: code
     type(state_type) :: err0
 
-
     interface
-        integer function stdlib_make_directory(cpath, cmode) bind(C, name='stdlib_make_directory')
+        integer function stdlib_make_directory(cpath) bind(C, name='stdlib_make_directory')
             import c_char
             character(kind=c_char), intent(in) :: cpath(*)
-            integer, intent(in) :: cmode
         end function stdlib_make_directory
     end interface
 
-    if (is_windows() .and. present(mode)) then
-        ! _mkdir() doesn't have a `mode` argument
-        err0 = state_type(STDLIB_FS_ERROR, "mode argument not present for Windows")
+    code = stdlib_make_directory(to_c_char(trim(path)))
+
+    if (code /= 0) then
+        err0 = FS_ERROR_CODE(code, c_get_strerror())
         call err0%handle(err)
-        return
     end if
 
-    code = stdlib_make_directory(to_c_char(trim(path)), mode)
-
-    select case (code)
-        case (0)
-            return
-        case default
-            ! error
-            err0 = state_type(STDLIB_FS_ERROR, "code:", to_string(code)//',', c_get_strerror())
-            call err0%handle(err)
-    end select
 end subroutine make_directory
 
 !! Removes an empty directory
@@ -985,71 +950,12 @@ subroutine remove_directory(path, err)
 
     code = stdlib_remove_directory(to_c_char(trim(path)))
 
-    select case (code)
-        case (0)
-            return
-        case default
-            ! error
-            err0 = state_type(STDLIB_FS_ERROR, "code:", to_string(code)//',', c_get_strerror())
-            call err0%handle(err)
-    end select
-end subroutine remove_directory
-
-subroutine get_cwd(cwd, err)
-    character(:), allocatable, intent(out) :: cwd
-    type(state_type), intent(out) :: err
-    type(state_type) :: err0
-
-    interface
-        type(c_ptr) function stdlib_get_cwd(len, stat) bind(C, name='stdlib_get_cwd')
-            import c_ptr, c_size_t
-            integer(c_size_t), intent(out) :: len
-            integer :: stat
-        end function stdlib_get_cwd
-    end interface
-
-    type(c_ptr) :: c_str_ptr
-    integer(c_size_t) :: len, i
-    integer :: stat
-    character(kind=c_char), pointer :: c_str(:)
-
-    c_str_ptr = stdlib_get_cwd(len, stat)
-
-    if (stat /= 0) then
-        err0 = state_type(STDLIB_FS_ERROR, "code: ", to_string(stat)//",", c_get_strerror())
-        call err0%handle(err)
-    end if
-
-    call c_f_pointer(c_str_ptr, c_str, [len])
-
-    allocate(character(len=len) :: cwd)
-
-    do concurrent (i=1:len)
-        cwd(i:i) = c_str(i)
-    end do
-end subroutine get_cwd
-
-subroutine set_cwd(path, err)
-    character(len=*), intent(in) :: path
-    type(state_type), intent(out) :: err
-    type(state_type) :: err0
-
-    interface
-        integer function stdlib_set_cwd(path) bind(C, name='stdlib_set_cwd')
-            import c_char
-            character(kind=c_char), intent(in) :: path(*)
-        end function stdlib_set_cwd
-    end interface
-
-    integer :: code
-
-    code = stdlib_set_cwd(to_c_char(trim(path)))
-
     if (code /= 0) then
-        err0 = state_type(STDLIB_FS_ERROR, "code: ", to_string(code)//",", c_get_strerror())
+        err0 = FS_ERROR_CODE(code, c_get_strerror())
         call err0%handle(err)
     end if
-end subroutine set_cwd
+
+end subroutine remove_directory
 
 !> Returns the file path of the null device for the current operating system.
 !>
