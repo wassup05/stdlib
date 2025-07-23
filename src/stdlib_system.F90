@@ -974,11 +974,9 @@ subroutine make_directory_all(path, err)
                 if (err0%error()) then
                     call err0%handle(err)
                 end if
-
-                return
-            else
-                exit
             end if
+
+            return
         end if
 
         if (check_is_dir) then
