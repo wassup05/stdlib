@@ -953,22 +953,25 @@ subroutine make_directory_all(path, err)
     character(len=*), intent(in) :: path
     type(state_type), optional, intent(out) :: err
 
-    integer :: code, i, indx
+    character(:), allocatable :: trim_path
+    integer :: i, indx
     type(state_type) :: err0
     character(len=1) :: sep
-    logical :: is_dir
+    logical :: is_dir, check_is_dir
 
+    trim_path = trim(path)
     sep = path_sep()
     i = 1
-    indx = find(path, sep, i)
+    indx = find(trim_path, sep, i)
+    check_is_dir = .true.
 
     do
         ! Base case to exit the loop
-        if (indx == 0 .or. indx == len(trim(path))) then
-            is_dir = is_directory(path)
+        if (indx == 0 .or. indx == len(trim_path)) then
+            is_dir = is_directory(trim_path)
 
             if (.not. is_dir) then
-                call make_directory(path, err0)
+                call make_directory(trim_path, err0)
 
                 if (err0%error()) then
                     call err0%handle(err)
@@ -978,10 +981,15 @@ subroutine make_directory_all(path, err)
             end if
         end if
 
-        is_dir = is_directory(path(1:indx))
+        if (check_is_dir) then
+            is_dir = is_directory(trim_path(1:indx))
+        end if
 
         if (.not. is_dir) then
-            call make_directory(path(1:indx), err0)
+            ! no need for further `is_dir` checks
+            ! all paths going forward need to be created
+            check_is_dir = .false.
+            call make_directory(trim_path(1:indx), err0)
 
             if (err0%error()) then
                 call err0%handle(err)
@@ -989,8 +997,8 @@ subroutine make_directory_all(path, err)
             end if
         end if
 
-        i = i + 1
-        indx = find(path, sep, i)
+        i = i + 1 ! the next occurence of `sep`
+        indx = find(trim_path, sep, i)
     end do
 end subroutine make_directory_all
 
