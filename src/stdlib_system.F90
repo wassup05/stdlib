@@ -2,7 +2,7 @@ module stdlib_system
 use, intrinsic :: iso_c_binding, only : c_int, c_long, c_ptr, c_null_ptr, c_int64_t, c_size_t, &
     c_f_pointer
 use stdlib_kinds, only: int64, dp, c_bool, c_char
-use stdlib_strings, only: to_c_char, find
+use stdlib_strings, only: to_c_char, find, to_string
 use stdlib_string_type, only: string_type
 use stdlib_optval, only: optval
 use stdlib_error, only: state_type, STDLIB_SUCCESS, STDLIB_FS_ERROR
@@ -16,11 +16,11 @@ public :: sleep
 !! ([Specification](../page/specs/stdlib_system.html#os_type-cached-os-type-retrieval))
 !!
 !! ### Summary
-!! Provides a cached value for the runtime OS type. 
+!! Provides a cached value for the runtime OS type.
 !!
 !! ### Description
-!! 
-!! This function caches the result of `get_runtime_os` after the first invocation. 
+!!
+!! This function caches the result of `get_runtime_os` after the first invocation.
 !! Subsequent calls return the cached value, ensuring minimal overhead.
 !!
 public :: OS_TYPE
@@ -31,10 +31,10 @@ public :: OS_TYPE
 !! ([Specification](../page/specs/stdlib_system.html#get_runtime_os-determine-the-os-type-at-runtime))
 !!
 !! ### Summary
-!! This function inspects the runtime environment to identify the OS type. 
+!! This function inspects the runtime environment to identify the OS type.
 !!
 !! ### Description
-!! 
+!!
 !! The function evaluates environment variables (`OSTYPE` or `OS`) and filesystem attributes
 !! to identify the OS. It distinguishes between several common operating systems:
 !! - Linux
@@ -46,7 +46,7 @@ public :: OS_TYPE
 !! - OpenBSD
 !!
 !! Returns a constant representing the OS type or `OS_UNKNOWN` if the OS cannot be determined.
-!!                    
+!!
 public :: get_runtime_os
 
 !> Version: experimental
@@ -72,7 +72,7 @@ integer, parameter, public :: &
     OS_OPENBSD = 7
 
 !! Helper function returning the name of an OS parameter
-public :: OS_NAME 
+public :: OS_NAME
 
 !> Public sub-processing interface
 public :: run
@@ -103,9 +103,9 @@ public :: dir_name
 !! Function to evaluate whether a specified path corresponds to an existing directory.
 !!
 !!### Description
-!! 
+!!
 !! This function checks if a given file system path is a directory. It is cross-platform and utilizes
-!! native system calls. It supports common operating systems such as Linux, macOS, 
+!! native system calls. It supports common operating systems such as Linux, macOS,
 !! Windows, and various UNIX-like environments. On unsupported operating systems, the function will return `.false.`.
 !!
 public :: is_directory
@@ -158,6 +158,32 @@ public :: remove_directory
 
 !! version: experimental
 !!
+!! Gets the current working directory of the process
+!! ([Specification](../page/specs/stdlib_system.html#get_cwd))
+!!
+!! ### Summary
+!! Gets the current working directory.
+!!
+!! ### Description
+!! This subroutine gets the current working directory of the process calling this function.
+!!
+public :: get_cwd
+
+!! version: experimental
+!!
+!! Sets the current working directory of the process
+!! ([Specification](../page/specs/stdlib_system.html#set_cwd))
+!!
+!! ### Summary
+!! Changes the current working directory to the one specified.
+!!
+!! ### Description
+!! This subroutine sets the current working directory of the process calling this function to the one specified.
+!!
+public :: set_cwd
+
+!! version: experimental
+!!
 !! Deletes a specified file from the filesystem.
 !! ([Specification](../page/specs/stdlib_system.html#delete_file-delete-a-file))
 !!
@@ -165,10 +191,10 @@ public :: remove_directory
 !! Subroutine to safely delete a file from the filesystem. It handles errors gracefully using the library's `state_type`.
 !!
 !!### Description
-!! 
+!!
 !! This subroutine deletes a specified file. If the file is a directory or inaccessible, an error is raised.
-!! If the file does not exist, a warning is returned, but no error state. Errors are handled using the 
-!! library's `state_type` mechanism. If the optional `err` argument is not provided, exceptions trigger 
+!! If the file does not exist, a warning is returned, but no error state. Errors are handled using the
+!! library's `state_type` mechanism. If the optional `err` argument is not provided, exceptions trigger
 !! an `error stop`.
 !!
 public :: delete_file
@@ -183,9 +209,9 @@ public :: delete_file
 !!
 !! ### Description
 !!
-!! The null device is a special file that discards all data written to it and always reads as 
+!! The null device is a special file that discards all data written to it and always reads as
 !! an empty file. This function returns the null device path, adapted for the operating system in use.
-!! 
+!!
 !! On Windows, this is `NUL`. On UNIX-like systems, this is `/dev/null`.
 !!
 public :: null_device
@@ -204,7 +230,7 @@ public :: FS_ERROR
 !! ([Specification](../page/specs/stdlib_system.html#FS_ERROR_CODE))
 !!
 public :: FS_ERROR_CODE
-     
+
 ! CPU clock ticks storage
 integer, parameter, private :: TICKS = int64
 integer, parameter, private :: RTICKS = dp
@@ -215,58 +241,58 @@ integer, parameter, public :: process_ID = c_int64_t
 ! Default flag for the runner process
 integer(process_ID), parameter, private :: FORKED_PROCESS = 0_process_ID
 
-!> Process type holding process information and the connected stdout, stderr, stdin units 
+!> Process type holding process information and the connected stdout, stderr, stdin units
 type :: process_type
-    
+
     !> Process ID (if external); 0 if run by the program process
     integer(process_ID)  :: id = FORKED_PROCESS
-    
+
     !> Process is completed
-    logical :: completed = .false.        
+    logical :: completed = .false.
     integer(TICKS) :: start_time = 0
-    
+
     !> Standard input
     character(:), allocatable :: stdin_file
     character(:), allocatable :: stdin
-    
+
     !> Standard output
     character(:), allocatable :: stdout_file
     character(:), allocatable :: stdout
-    
+
     !> Error output
-    integer :: exit_code = 0    
+    integer :: exit_code = 0
     character(:), allocatable :: stderr_file
     character(:), allocatable :: stderr
-    
-    !> Callback function 
+
+    !> Callback function
     procedure(process_callback), nopass, pointer :: oncomplete => null()
-    
+
     !> Optional payload for the callback function
     class(*), pointer :: payload => null()
-    
+
     !> Store time at the last update
     integer(TICKS) :: last_update = 0
-    
+
 contains
 
     !! Check if process is still running
     procedure :: is_running   => process_is_running
-    
+
     !! Check if process is completed
     procedure :: is_completed => process_is_completed
-    
+
     !! Return elapsed time since inception
     procedure :: elapsed      => process_lifetime
-    
+
     !! Update process state internals
     procedure :: update       => update_process_state
-    
+
     !! Kill a process
     procedure :: kill         => process_kill
-    
+
     !! Get process ID
     procedure :: pid          => process_get_ID
-    
+
 end type process_type
 
 interface runasync
@@ -276,13 +302,13 @@ interface runasync
     !! ([Specification](../page/specs/stdlib_system.html#runasync-execute-an-external-process-asynchronously))
     !!
     !! ### Summary
-    !! Provides methods for executing external processes asynchronously, using either a single command string 
+    !! Provides methods for executing external processes asynchronously, using either a single command string
     !! or an argument list, with options for output collection and standard input.
     !!
     !! ### Description
-    !! 
-    !! This interface allows the user to spawn external processes asynchronously (non-blocking). 
-    !! Processes can be executed via a single command string or a list of arguments, with options to collect 
+    !!
+    !! This interface allows the user to spawn external processes asynchronously (non-blocking).
+    !! Processes can be executed via a single command string or a list of arguments, with options to collect
     !! standard output and error streams, or to provide a standard input stream via a `character` string.
     !! Additionally, a callback function can be provided, which will be called upon process completion.
     !! A user-defined payload can be attached and passed to the callback for handling process-specific data.
@@ -304,7 +330,7 @@ interface runasync
         class(*), optional, intent(inout), target :: payload
         !> The output process handler.
         type(process_type) :: process
-        
+
     end function run_async_cmd
 
     module function run_async_args(args, stdin, want_stdout, want_stderr, callback, payload) result(process)
@@ -319,9 +345,9 @@ interface runasync
         !> Optional callback function to be called on process completion
         procedure(process_callback), optional :: callback
         !> Optional payload to pass to the callback on completion
-        class(*), optional, intent(inout), target :: payload        
+        class(*), optional, intent(inout), target :: payload
         !> The output process handler.
-        type(process_type) :: process        
+        type(process_type) :: process
     end function run_async_args
 end interface runasync
 
@@ -332,16 +358,16 @@ interface run
     !! ([Specification](../page/specs/stdlib_system.html#run-execute-an-external-process-synchronously))
     !!
     !! ### Summary
-    !! Provides methods for executing external processes synchronously, using either a single command string 
+    !! Provides methods for executing external processes synchronously, using either a single command string
     !! or an argument list, with options for output collection and standard input.
     !!
     !! ### Description
-    !! 
-    !! This interface allows the user to spawn external processes synchronously (blocking), 
-    !! via either a single command string or a list of arguments. It also includes options to collect 
+    !!
+    !! This interface allows the user to spawn external processes synchronously (blocking),
+    !! via either a single command string or a list of arguments. It also includes options to collect
     !! standard output and error streams, or to provide a standard input stream via a `character` string.
-    !! Additionally, it supports an optional callback function that is invoked upon process completion, 
-    !! allowing users to process results dynamically. A user-defined payload can also be provided, 
+    !! Additionally, it supports an optional callback function that is invoked upon process completion,
+    !! allowing users to process results dynamically. A user-defined payload can also be provided,
     !! which is passed to the callback function to facilitate contextual processing.
     !!
     !! @note The implementation depends on system-level process management capabilities.
@@ -358,7 +384,7 @@ interface run
         !> Optional callback function to be called on process completion
         procedure(process_callback), optional :: callback
         !> Optional payload to pass to the callback on completion
-        class(*), optional, intent(inout), target :: payload            
+        class(*), optional, intent(inout), target :: payload
         !> The output process handler.
         type(process_type) :: process
     end function run_sync_cmd
@@ -375,11 +401,11 @@ interface run
         !> Optional callback function to be called on process completion
         procedure(process_callback), optional :: callback
         !> Optional payload to pass to the callback on completion
-        class(*), optional, intent(inout), target :: payload            
+        class(*), optional, intent(inout), target :: payload
         !> The output process handler.
-        type(process_type) :: process        
+        type(process_type) :: process
     end function run_sync_args
-    
+
 end interface run
 
 interface is_running
@@ -392,9 +418,9 @@ interface is_running
     !! Provides a method to determine if an external process is still actively running.
     !!
     !! ### Description
-    !! 
-    !! This interface checks the status of an external process to determine whether it is still actively running. 
-    !! It is particularly useful for monitoring asynchronous processes created using the `run` interface. 
+    !!
+    !! This interface checks the status of an external process to determine whether it is still actively running.
+    !! It is particularly useful for monitoring asynchronous processes created using the `run` interface.
     !! The internal state of the `process_type` object is updated after the call to reflect the current process status.
     !!
     !! @note The implementation relies on system-level process management capabilities.
@@ -416,9 +442,9 @@ interface is_completed
     !! Provides a method to determine if an external process has finished execution.
     !!
     !! ### Description
-    !! 
-    !! This interface checks the status of an external process to determine whether it has finished execution. 
-    !! It is particularly useful for monitoring asynchronous processes created using the `run` interface. 
+    !!
+    !! This interface checks the status of an external process to determine whether it has finished execution.
+    !! It is particularly useful for monitoring asynchronous processes created using the `run` interface.
     !! The internal state of the `process_type` object is updated after the call to reflect the current process status.
     !!
     !! @note The implementation relies on system-level process management capabilities.
@@ -440,9 +466,9 @@ interface elapsed
     !! Provides the total elapsed time (in seconds) since the creation of the specified process.
     !!
     !! ### Description
-    !! 
-    !! This interface returns the total elapsed time (in seconds) for a given process since it was started. 
-    !! If the process is still running, the value returned reflects the time from the creation of the process 
+    !!
+    !! This interface returns the total elapsed time (in seconds) for a given process since it was started.
+    !! If the process is still running, the value returned reflects the time from the creation of the process
     !! until the call to this function. Otherwise, the total process duration until completion is returned.
     !!
     module function process_lifetime(process) result(delta_t)
@@ -465,9 +491,9 @@ interface wait
     !! Supports an optional maximum wait time, after which the function returns regardless of process completion.
     !!
     !! ### Description
-    !! 
+    !!
     !! This interface allows waiting for a process to complete. If the process is running asynchronously, this subroutine
-    !! will block further execution until the process finishes. Optionally, a maximum wait time can be specified; if 
+    !! will block further execution until the process finishes. Optionally, a maximum wait time can be specified; if
     !! the process doesn't complete within this time, the subroutine returns without further waiting.
     !!
     !! @note The process state is accordingly updated on return from this call.
@@ -490,7 +516,7 @@ interface update
     !! Provides a method to query the system and update the internal state of the specified process variable.
     !!
     !! ### Description
-    !! 
+    !!
     !! This subroutine queries the system to retrieve and update information about the state of the process.
     !! Once the process is completed, and if standard output or standard error were requested, their respective
     !! data is loaded into the `process%stdout` and `process%stderr` variables. This routine is useful for keeping
@@ -516,13 +542,13 @@ interface kill
     !! Returns a boolean flag indicating whether the termination was successful.
     !!
     !! ### Description
-    !! 
-    !! This interface allows for the termination of an external process that is still running.  
+    !!
+    !! This interface allows for the termination of an external process that is still running.
     !! If the process is successfully killed, the `success` output flag is set to `.true.`, otherwise `.false.`.
     !! This function is useful for controlling and managing processes that are no longer needed or for forcefully
     !! stopping an unresponsive process.
     !!
-    !! @note This operation may be system-dependent and could fail if the underlying user does not have 
+    !! @note This operation may be system-dependent and could fail if the underlying user does not have
     !! the necessary rights to kill a process.
     !!
     module subroutine process_kill(process, success)
@@ -532,7 +558,7 @@ interface kill
         logical, intent(out) :: success
     end subroutine process_kill
 end interface kill
- 
+
 interface sleep
     !! version: experimental
     !!
@@ -544,9 +570,9 @@ interface sleep
     !! wrapper around platform-specific sleep functions, providing consistent behavior on different operating systems.
     !!
     !! ### Description
-    !! 
+    !!
     !! This interface allows the user to pause the execution of a program for a specified duration, expressed in
-    !! milliseconds. It provides a cross-platform wrapper around native sleep functions, ensuring that the program 
+    !! milliseconds. It provides a cross-platform wrapper around native sleep functions, ensuring that the program
     !! will sleep for the requested amount of time on different systems (e.g., using `Sleep` on Windows or `nanosleep`
     !! on Unix-like systems).
     !!
@@ -557,20 +583,20 @@ interface sleep
         integer, intent(in) :: millisec
     end subroutine sleep
 end interface sleep
-      
+
 abstract interface
 
     !! version: experimental
     !!
     !! Process callback interface
-    !! 
-    !! ### Summary 
     !!
-    !! The `process_callback` interface defines a user-provided subroutine that will be called 
-    !! upon process completion. It provides access to process metadata, including the process ID, 
-    !! exit state, and optional input/output streams. If passed on creation, a generic payload can be 
+    !! ### Summary
+    !!
+    !! The `process_callback` interface defines a user-provided subroutine that will be called
+    !! upon process completion. It provides access to process metadata, including the process ID,
+    !! exit state, and optional input/output streams. If passed on creation, a generic payload can be
     !! accessed by the callback function. This variable must be a valid `target` in the calling scope.
-    !!  
+    !!
     subroutine process_callback(pid,exit_state,stdin,stdout,stderr,payload)
         import process_ID
         implicit none
@@ -581,16 +607,16 @@ abstract interface
         !> Process input/output: presence of these arguments depends on how process was created
         character(len=*), optional, intent(in) :: stdin,stdout,stderr
         !> Optional payload passed by the user on process creation
-        class(*), optional, intent(inout) :: payload        
+        class(*), optional, intent(inout) :: payload
     end subroutine process_callback
-end interface          
-    
+end interface
+
 !! Static storage for the current OS
 logical :: have_os    = .false.
 integer :: OS_CURRENT = OS_UNKNOWN
 
-interface 
-    
+interface
+
     !! version: experimental
     !!
     !! Returns a `logical` flag indicating if the system is Windows.
@@ -600,7 +626,7 @@ interface
     !! A fast, compile-time check to determine if the system is running Windows, based on the `_WIN32` macro.
     !!
     !! ### Description
-    !! 
+    !!
     !! This interface provides a function to check if the current system is Windows. The check is performed by
     !! wrapping a C function that tests if the `_WIN32` macro is defined. This check is fast and occurs at
     !! compile-time, making it a more efficient alternative to platform-specific runtime checks.
@@ -612,14 +638,14 @@ interface
     !!
     module logical function is_windows()
     end function is_windows
-    
+
     module function process_get_ID(process) result(ID)
         class(process_type), intent(in) :: process
         !> Return a process ID
         integer(process_ID) :: ID
     end function process_get_ID
-    
-end interface 
+
+end interface
 
 interface join_path
     !! version: experimental
@@ -766,7 +792,7 @@ integer function get_runtime_os() result(os)
     !! - **OS_LINUX**, **OS_MACOS**, **OS_WINDOWS**, **OS_CYGWIN**, **OS_SOLARIS**, **OS_FREEBSD**, or **OS_OPENBSD**.
     !!
     !! Note: This function performs a detailed runtime inspection, so it has non-negligible overhead.
-    
+
     ! Local variables
     character(len=255) :: val
     integer            :: length, rc
@@ -846,16 +872,16 @@ integer function get_runtime_os() result(os)
         os = OS_FREEBSD
         return
     end if
-    
+
 end function get_runtime_os
 
 !> Retrieves the cached OS type for minimal runtime overhead.
 integer function OS_TYPE() result(os)
     !! This function uses a static cache to avoid recalculating the OS type after the first call.
     !! It is recommended for performance-sensitive use cases where the OS type is checked multiple times.
-    if (.not.have_os) then 
+    if (.not.have_os) then
         OS_CURRENT = get_runtime_os()
-        have_os = .true.        
+        have_os = .true.
     end if
     os = OS_CURRENT
 end function OS_TYPE
@@ -884,20 +910,20 @@ logical function is_directory(path)
     character(*), intent(in) :: path
 
     interface
-        
+
         logical(c_bool) function stdlib_is_directory(path) bind(c, name="stdlib_is_directory")
             import c_bool, c_char
             character(kind=c_char), intent(in) :: path(*)
         end function stdlib_is_directory
 
-    end interface        
-    
+    end interface
+
     is_directory = logical(stdlib_is_directory(to_c_char(trim(path))))
-    
+
 end function is_directory
 
 ! A helper function to get the result of the C function `strerror`.
-! `strerror` is a function provided by `<string.h>`. 
+! `strerror` is a function provided by `<string.h>`.
 ! It returns a string describing the meaning of `errno` in the C header `<errno.h>`
 function c_get_strerror() result(str)
     character(len=:), allocatable :: str
@@ -1024,27 +1050,83 @@ subroutine remove_directory(path, err)
 
 end subroutine remove_directory
 
+subroutine get_cwd(cwd, err)
+    character(:), allocatable, intent(out) :: cwd
+    type(state_type), intent(out) :: err
+    type(state_type) :: err0
+
+    interface
+        type(c_ptr) function stdlib_get_cwd(len, stat) bind(C, name='stdlib_get_cwd')
+            import c_ptr, c_size_t
+            integer(c_size_t), intent(out) :: len
+            integer :: stat
+        end function stdlib_get_cwd
+    end interface
+
+    type(c_ptr) :: c_str_ptr
+    integer(c_size_t) :: len, i
+    integer :: stat
+    character(kind=c_char), pointer :: c_str(:)
+
+    c_str_ptr = stdlib_get_cwd(len, stat)
+
+    if (stat /= 0) then
+        err0 = state_type(STDLIB_FS_ERROR, "code: ", to_string(stat)//",", c_get_strerror())
+        call err0%handle(err)
+    end if
+
+    call c_f_pointer(c_str_ptr, c_str, [len])
+
+    allocate(character(len=len) :: cwd)
+
+    do concurrent (i=1:len)
+        cwd(i:i) = c_str(i)
+    end do
+end subroutine get_cwd
+
+subroutine set_cwd(path, err)
+    character(len=*), intent(in) :: path
+    type(state_type), intent(out) :: err
+    type(state_type) :: err0
+
+    interface
+        integer function stdlib_set_cwd(path) bind(C, name='stdlib_set_cwd')
+            import c_char
+            character(kind=c_char), intent(in) :: path(*)
+        end function stdlib_set_cwd
+    end interface
+
+    integer :: code
+
+    code = stdlib_set_cwd(to_c_char(trim(path)))
+
+    if (code /= 0) then
+        err0 = state_type(STDLIB_FS_ERROR, "code: ", to_string(code)//",", c_get_strerror())
+        call err0%handle(err)
+    end if
+end subroutine set_cwd
+
 !> Returns the file path of the null device for the current operating system.
 !>
 !> Version: Helper function.
 function null_device() result(path)
     !> File path of the null device
     character(:), allocatable :: path
-    
+
     interface
-    
+
         ! No-overhead return path to the null device
         type(c_ptr) function process_null_device(len) bind(C,name='process_null_device')
-            import c_ptr, c_size_t    
+            import c_ptr, c_size_t
             implicit none
             integer(c_size_t), intent(out) :: len
-        end function process_null_device    
-        
+        end function process_null_device
+
     end interface
-    
+
     integer(c_size_t) :: i, len
     type(c_ptr) :: c_path_ptr
-    character(kind=c_char), pointer :: c_path(:)    
+    character(kind=c_char), pointer :: c_path(:)
 
     ! Call the C function to get the null device path and its length
     c_path_ptr = process_null_device(len)
@@ -1052,11 +1134,11 @@ function null_device() result(path)
 
     ! Allocate the Fortran string with the length returned from C
     allocate(character(len=len) :: path)
-        
+
     do concurrent (i=1:len)
         path(i:i) = c_path(i)
     end do
-        
+
 end function null_device
 
 !> Delete a file at the given path.
@@ -1065,17 +1147,17 @@ subroutine delete_file(path, err)
     type(state_type), optional, intent(out) :: err
 
     !> Local variables
-    integer :: file_unit, ios        
+    integer :: file_unit, ios
     type(state_type) :: err0
     character(len=512) :: msg
     logical :: file_exists
 
-    ! Verify the file is not a directory.     
-    if (is_directory(path)) then 
+    ! Verify the file is not a directory.
+    if (is_directory(path)) then
         ! If unable to open, assume it's a directory or inaccessible
         err0 = state_type(STDLIB_FS_ERROR,'Cannot delete',path,'- is a directory')
         call err0%handle(err)
-        return            
+        return
     end if
 
     ! Check if the path exists
@@ -1094,17 +1176,17 @@ subroutine delete_file(path, err)
     if (ios /= 0) then
         err0 = state_type(STDLIB_FS_ERROR,'Cannot delete',path,'-',msg)
         call err0%handle(err)
-        return              
-    end if        
+        return
+    end if
     close(unit=file_unit, status='delete', iostat=ios, iomsg=msg)
     if (ios /= 0) then
         err0 = state_type(STDLIB_FS_ERROR,'Cannot delete',path,'-',msg)
         call err0%handle(err)
-        return              
+        return
     end if
 end subroutine delete_file
 
-pure function FS_ERROR_CODE(code,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,& 
+pure function FS_ERROR_CODE(code,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,&
         a11,a12,a13,a14,a15,a16,a17,a18,a19) result(state)
 
     type(state_type) :: state
