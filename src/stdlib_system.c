@@ -26,7 +26,7 @@ char* stdlib_strerror(size_t* len, bool winapi){
     NULL,
     dw,
     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-    (LPSTR) &lpMsgBuf,
+    (LPSTR) &err,
     0,
     NULL);
 
