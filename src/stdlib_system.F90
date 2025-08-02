@@ -205,12 +205,42 @@ public :: FS_ERROR
 !!
 public :: FS_ERROR_CODE
 
+!> Version: experimental
+!>
+!> Integer constants representing the most common path types.
+!> ([Specification](../page/specs/stdlib_system.html))
 integer, parameter, public :: &
+    !> Represents an unknown path type
     type_unknown      = 0, &
+    !> Represents a regular file
     type_regular_file = 1, &
+    !> Represents a directory
     type_directory    = 2, &
+    !> Represents a symbolic link
     type_symlink      = 3
 
+!! version: experimental
+!!
+!! Checks if a path exists in the filesystem.
+!! ([Specification](../page/specs/stdlib_system.html#exists))
+!!
+!!### Summary
+!! Function to check whether the path exists in the fileystem at all.
+!! If the path does exist, returns the type of the path.
+!!
+!!### Description
+!! 
+!! The function performs a system call (syscall) to the operating system, to retrieve the metadata
+!! corresponding to a path, and identifies the type of path it is. 
+!! It can distinguish among the following path types
+!!
+!! - Regular File
+!! - Directory
+!! - Symbolic Link
+!!
+!! Returns a constant representing the path type or `type_unknown` if it cannot be determined.
+!! If there has been an error, It is handled using `state_type`.
+!!
 public :: exists
      
 ! CPU clock ticks storage

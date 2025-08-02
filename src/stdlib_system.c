@@ -11,7 +11,10 @@
 #include <unistd.h>
 #endif /* ifdef _WIN32 */
 
-// Returns the string describing the meaning of `errno` code (by calling `strerror`).
+// Wrapper to get the string describing a system syscall error.
+// Uses `strerr` on unix.
+// if `winapi` is `false`, uses the usual `strerr` on windows.
+// If `winapi` is `false`, uses `FormatMessage`(from windows.h) on windows.
 char* stdlib_strerror(size_t* len, bool winapi){
 
     if (winapi) {
@@ -20,7 +23,7 @@ char* stdlib_strerror(size_t* len, bool winapi){
     DWORD dw = GetLastError();
 
     FormatMessage(
-    FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+    FORMAT_MESSAGE_ALLOCATE_BUFFER |
     FORMAT_MESSAGE_FROM_SYSTEM |
     FORMAT_MESSAGE_IGNORE_INSERTS,
     NULL,
@@ -32,6 +35,7 @@ char* stdlib_strerror(size_t* len, bool winapi){
 
     *len = strlen(err);
     return (char*) err;
+
 #endif /* ifdef _WIN32 */
     }
 
@@ -71,8 +75,9 @@ int stdlib_remove_directory(const char* path){
 
 // Wrapper to the platform's `stat`(status of path) call.
 // Uses `lstat` on unix, `GetFileAttributesA` on windows.
-// Returns the `type` of the path, negative values indicate an error.
+// Returns the `type` of the path, and sets the `stat`(if any errors).
 int stdlib_exists(const char* path, int* stat){
+    // All the valid types
     const int type_unknown = 0;
     const int type_regular_file = 1;
     const int type_directory = 2;
@@ -98,6 +103,7 @@ int stdlib_exists(const char* path, int* stat){
     status = lstat(path, &buf);
 
     if (status == -1) {
+        // `lstat` failed
         *stat = errno;
         return type_unknown;
     }
