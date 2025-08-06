@@ -119,3 +119,14 @@ int stdlib_exists(const char* path, int* stat){
 #endif /* ifdef _WIN32 */
     return type;
 }
+
+// `stat` and `_stat` follow symlinks automatically.
+// so no need for winapi functions.
+bool stdlib_is_regular_file(const char* path) {
+    struct stat buf = {0};
+#ifdef _WIN32
+    return _stat(path, &buf) == 0 && S_ISREG(buf.st_mode);
+#else
+    return stat(path, &buf) == 0 && S_ISREG(buf.st_mode);
+#endif /* ifdef _WIN32 */
+}
