@@ -93,8 +93,6 @@ public :: operator(/)
 public :: split_path
 public :: base_name
 public :: dir_name
-public :: is_abs_path
-public :: abs_path
 
 !! version: experimental
 !!
@@ -183,6 +181,21 @@ public :: get_cwd
 !! This subroutine sets the current working directory the process is executing from.
 !!
 public :: set_cwd
+
+!! version: experimental
+!!
+!! Gets the size (in bytes) of a file.
+!! ([Specification](../page/specs/stdlib_system.html#get_file_size))
+!!
+!! ### Summary
+!! Gets the size (in bytes) of a file.
+!!
+!! ### Description
+!! This function gets the size (in bytes) of a file in the filesystem.
+!! It follows symbolic links, gives an error if the symbolic link or the `path` points to a directory instead.
+!! It is designed to work across multiple platforms. On Windows, paths with both forward `/` and backward `\` slashes are accepted.
+!!
+public :: get_file_size
 
 !! version: experimental
 !!
@@ -783,46 +796,6 @@ interface dir_name
     end function dir_name_string
 end interface dir_name
 
-interface is_abs_path
-    !! version: experimental
-    !!
-    !!### Summary
-    !! This function checks if the path is absolute.
-    !! ([Specification](../page/specs/stdlib_system.html#is_abs_path))
-    !!
-    !!### Description
-    !! This function checks if the path is absolute (i.e not relative).
-    !! - On POSIX systems this means the path starts with `/`.
-    !! - On Windows systems this means the path is either an UNC path (like `\\host\path\share`) or
-    !! a path starting with a drive letter (like `C:\Users\`)
-    module logical function is_abs_path_char(p)
-        character(len=*), intent(in) :: p
-    end function is_abs_path_char
-
-    module logical function is_abs_path_string(p)
-        type(string_type), intent(in) :: p
-    end function is_abs_path_string
-end interface is_abs_path
-
-interface abs_path
-    !! version: experimental
-    !!
-    !!### Summary
-    !! This function returns the absolutized version of the provided path.
-    !! ([Specification](../page/specs/stdlib_system.html#abs_path))
-    !!
-    module function abs_path_char(p, err) result(abs_p)
-        character(len=*), intent(in) :: p
-        type(state_type), optional, intent(out) :: err
-        character(len=:), allocatable :: abs_p
-    end function abs_path_char
-
-    module function abs_path_string(p, err) result(abs_p)
-        type(string_type), intent(in) :: p
-        type(state_type), optional, intent(out) :: err
-        type(string_type) :: abs_p
-    end function abs_path_string
-end interface abs_path
 
 contains
 
@@ -1153,6 +1126,39 @@ subroutine set_cwd(path, err)
         call err0%handle(err)
     end if
 end subroutine set_cwd
+
+integer(int64) function get_file_size(path, err) result(size)
+    character(*), intent(in) :: path
+    type(state_type), optional, intent(out) :: err
+
+    interface
+        integer function stdlib_get_file_size(path, size) bind(C)
+            import c_char, c_int64_t
+            character(kind=c_char), intent(in) :: path(*)
+            integer(c_int64_t), intent(out) :: size
+        end function stdlib_get_file_size
+    end interface
+
+    type(state_type) :: err0
+    integer :: code
+    integer(c_int64_t) :: c_size
+
+    if (is_directory(path)) then
+        err0 = FS_ERROR("Is a directory!")
+        call err0%handle(err)
+        return
+    end if
+
+    code = stdlib_get_file_size(to_c_char(trim(path)), c_size)
+
+    if (code /= 0) then
+        err0 = FS_ERROR_CODE(code, c_get_strerror())
+        call err0%handle(err)
+        return
+    end if
+
+    size = c_size
+end function get_file_size
 
 !> Returns the file path of the null device for the current operating system.
 !>
