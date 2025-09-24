@@ -346,21 +346,12 @@ contains
 
         last = len(string)
         nsub = len(substring)
-        if (nsub > 0 .and. nsub <= last) then
-            do while(last >= nsub)
-                if (string(last-nsub+1:last) == substring) then
-                    last = last - nsub
-                else
-                    exit
-                end if
+        if (nsub > 0) then
+            do while(string(last-nsub+1:last) == substring)
+                last = last - nsub
             end do
         end if
-
-        if (last <= 0) then
-            chomped_string = ''
-        else
-            chomped_string = string(1:last)
-        end if        
+        chomped_string = string(1:last)
 
     end function chomp_substring_char_char
 
