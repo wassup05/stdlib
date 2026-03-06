@@ -3,6 +3,7 @@ module test_intrinsics
     use testdrive, only : new_unittest, unittest_type, error_type, check, skip_test
     use stdlib_kinds, only: sp, dp, xdp, qp, int8, int16, int32, int64
     use stdlib_intrinsics
+    use stdlib_linalg, only: mnorm
     use stdlib_linalg_state, only: linalg_state_type, LINALG_VALUE_ERROR, operator(==)
     use stdlib_math, only: swap
     implicit none
@@ -369,6 +370,27 @@ subroutine test_dot_product(error)
         call check(error, all(err(:)<tolerance) , "complex dot_product is not accurate" )
         if (allocated(error)) return
     end block
+
+    block ! test for https://github.com/fortran-lang/stdlib/issues/1016
+        complex(sp) :: x(128), y(128)
+        real(sp) :: z(128,2)
+        real(sp), parameter :: tolerance = epsilon(1._sp)*100000
+        real(sp) :: err(2)
+        complex(sp) :: p(3)
+
+        call random_number(z)
+        x%re = z(:, 1); x%im = z(:, 2)
+        call random_number(z)
+        y%re = z(:, 1); y%im = z(:, 2)
+        
+        p(1) = dot_product(x,y) ! compiler intrinsic
+        p(2) = stdlib_dot_product_kahan(x,y) ! chunked Kahan dot_product
+        p(3) = stdlib_dot_product(x,y)       ! chunked dot_product
+        err(1:2) = sqrt((p(2:3)%re - p(1)%re)**2 + (p(2:3)%im - p(1)%im)**2)
+        
+        call check(error, all(err(:)<tolerance) , "complex dot_product does not conform to the standard" )
+        if (allocated(error)) return
+    end block
     block
         complex(dp), allocatable :: x(:)
         real(dp), parameter :: total_sum = 4*atan(1._dp), tolerance = epsilon(1._dp)*100
@@ -395,6 +417,27 @@ subroutine test_dot_product(error)
         if (allocated(error)) return
     end block
 
+    block ! test for https://github.com/fortran-lang/stdlib/issues/1016
+        complex(dp) :: x(128), y(128)
+        real(dp) :: z(128,2)
+        real(dp), parameter :: tolerance = epsilon(1._dp)*100000
+        real(dp) :: err(2)
+        complex(dp) :: p(3)
+
+        call random_number(z)
+        x%re = z(:, 1); x%im = z(:, 2)
+        call random_number(z)
+        y%re = z(:, 1); y%im = z(:, 2)
+        
+        p(1) = dot_product(x,y) ! compiler intrinsic
+        p(2) = stdlib_dot_product_kahan(x,y) ! chunked Kahan dot_product
+        p(3) = stdlib_dot_product(x,y)       ! chunked dot_product
+        err(1:2) = sqrt((p(2:3)%re - p(1)%re)**2 + (p(2:3)%im - p(1)%im)**2)
+        
+        call check(error, all(err(:)<tolerance) , "complex dot_product does not conform to the standard" )
+        if (allocated(error)) return
+    end block
+
 end subroutine
 
 subroutine test_matmul(error)
@@ -407,55 +450,81 @@ subroutine test_matmul(error)
     if (allocated(error)) return
 
     block
-        real(sp) :: x(10,15), y(15,20), z(20,10), r(10,10), r1(10,10)
+        integer, parameter :: l = 10, m = 15, n = 20
+        real(sp) :: x(l,m), y(m,n), z(n,l), r(l,l), r1(l,l)
         call random_number(x)
         call random_number(y)
         call random_number(z)
 
+        ! Normalize matrices.
+        x = x / mnorm(x, 1)
+        y = y / mnorm(y, 1)
+        z = z / mnorm(z, 1)
+
         r = stdlib_matmul(x, y, z) ! the optimal ordering would be (x(yz))
         r1 = matmul(matmul(x, y), z) ! the opposite order to induce a difference
 
-        call check(error, all(abs(r-r1) <= epsilon(0._sp) * 150), "real, sp, 3 args: error too large")
+        call check(error, mnorm(r-r1, 1) <= n*epsilon(0._sp), "real, sp, 3 args: error too large")
         if (allocated(error)) return
     end block
 
     block
-        real(sp) :: x(10,15), y(15,20), z(20,10), w(10, 15), r(10,15), r1(10,15)
+        integer, parameter :: l = 10, m = 15, n = 20
+        real(sp) :: x(l,m), y(m,n), z(n,l), w(l, m), r(l,m), r1(l,m)
         call random_number(x)
         call random_number(y)
         call random_number(z)
         call random_number(w)
 
+        ! Normalize matrices.
+        x = x / mnorm(x, 1)
+        y = y / mnorm(y, 1)
+        z = z / mnorm(z, 1)
+        w = w / mnorm(w, 1)
+
         r = stdlib_matmul(x, y, z, w) ! the optimal order would be ((x(yz))w)
         r1 = matmul(matmul(x, y), matmul(z, w))
 
-        call check(error, all(abs(r-r1) <= epsilon(0._sp) * 800), "real, sp, 4 args: error too large")
+        call check(error, mnorm(r-r1, 1) <= n*epsilon(0._sp), "real, sp, 4 args: error too large")
         if (allocated(error)) return
     end block
     block
-        real(dp) :: x(10,15), y(15,20), z(20,10), r(10,10), r1(10,10)
+        integer, parameter :: l = 10, m = 15, n = 20
+        real(dp) :: x(l,m), y(m,n), z(n,l), r(l,l), r1(l,l)
         call random_number(x)
         call random_number(y)
         call random_number(z)
 
+        ! Normalize matrices.
+        x = x / mnorm(x, 1)
+        y = y / mnorm(y, 1)
+        z = z / mnorm(z, 1)
+
         r = stdlib_matmul(x, y, z) ! the optimal ordering would be (x(yz))
         r1 = matmul(matmul(x, y), z) ! the opposite order to induce a difference
 
-        call check(error, all(abs(r-r1) <= epsilon(0._dp) * 150), "real, dp, 3 args: error too large")
+        call check(error, mnorm(r-r1, 1) <= n*epsilon(0._dp), "real, dp, 3 args: error too large")
         if (allocated(error)) return
     end block
 
     block
-        real(dp) :: x(10,15), y(15,20), z(20,10), w(10, 15), r(10,15), r1(10,15)
+        integer, parameter :: l = 10, m = 15, n = 20
+        real(dp) :: x(l,m), y(m,n), z(n,l), w(l, m), r(l,m), r1(l,m)
         call random_number(x)
         call random_number(y)
         call random_number(z)
         call random_number(w)
 
+        ! Normalize matrices.
+        x = x / mnorm(x, 1)
+        y = y / mnorm(y, 1)
+        z = z / mnorm(z, 1)
+        w = w / mnorm(w, 1)
+
         r = stdlib_matmul(x, y, z, w) ! the optimal order would be ((x(yz))w)
         r1 = matmul(matmul(x, y), matmul(z, w))
 
-        call check(error, all(abs(r-r1) <= epsilon(0._dp) * 800), "real, dp, 4 args: error too large")
+        call check(error, mnorm(r-r1, 1) <= n*epsilon(0._dp), "real, dp, 4 args: error too large")
         if (allocated(error)) return
     end block
 end subroutine test_matmul
@@ -474,7 +543,7 @@ program tester
     stat = 0
 
     testsuites = [ &
-        new_testsuite("sparse", collect_suite) &
+        new_testsuite("intrinsic", collect_suite) &
         ]
 
     do is = 1, size(testsuites)

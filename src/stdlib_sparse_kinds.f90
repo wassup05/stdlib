@@ -1,3 +1,4 @@
+
 !! The `stdlib_sparse_kinds` module provides derived type definitions for different sparse matrices
 !!
 ! This code was modified from https://github.com/jalvesz/FSPARSE by its author: Alves Jose
@@ -8,6 +9,8 @@ module stdlib_sparse_kinds
     private
     public :: sparse_full, sparse_lower, sparse_upper
     public :: sparse_op_none, sparse_op_transpose, sparse_op_hermitian
+    public :: operator(+), operator(-), operator(*), operator(/)
+
     !! version: experimental
     !!
     !! Base sparse type holding the meta data related to the storage capacity of a matrix.
@@ -232,6 +235,1051 @@ module stdlib_sparse_kinds
         procedure, non_overridable :: add_block => add_block_sellc_cdp
         generic :: add => add_value, add_block
     end type
+
+    !! Overload the `+` operator for sparse matrices
+    !! [Specifications](../page/specs/stdlib_sparse.html#operators)    
+    interface operator(+)
+        pure module function sparse_add_COO_sp(a, b) result(c)
+        type(COO_sp_type), intent(in) :: a, b
+        type(COO_sp_type) :: c
+        end function
+
+        pure module function sparse_add_COO_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(COO_sp_type), intent(in) :: b
+        type(COO_sp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_COO_sp(a, b) result(c)
+        type(COO_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(COO_sp_type) :: c
+        end function
+        pure module function sparse_add_COO_dp(a, b) result(c)
+        type(COO_dp_type), intent(in) :: a, b
+        type(COO_dp_type) :: c
+        end function
+
+        pure module function sparse_add_COO_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(COO_dp_type), intent(in) :: b
+        type(COO_dp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_COO_dp(a, b) result(c)
+        type(COO_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(COO_dp_type) :: c
+        end function
+        pure module function sparse_add_COO_csp(a, b) result(c)
+        type(COO_csp_type), intent(in) :: a, b
+        type(COO_csp_type) :: c
+        end function
+
+        pure module function sparse_add_COO_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(COO_csp_type), intent(in) :: b
+        type(COO_csp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_COO_csp(a, b) result(c)
+        type(COO_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(COO_csp_type) :: c
+        end function
+        pure module function sparse_add_COO_cdp(a, b) result(c)
+        type(COO_cdp_type), intent(in) :: a, b
+        type(COO_cdp_type) :: c
+        end function
+
+        pure module function sparse_add_COO_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(COO_cdp_type), intent(in) :: b
+        type(COO_cdp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_COO_cdp(a, b) result(c)
+        type(COO_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(COO_cdp_type) :: c
+        end function
+        pure module function sparse_add_CSR_sp(a, b) result(c)
+        type(CSR_sp_type), intent(in) :: a, b
+        type(CSR_sp_type) :: c
+        end function
+
+        pure module function sparse_add_CSR_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(CSR_sp_type), intent(in) :: b
+        type(CSR_sp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_CSR_sp(a, b) result(c)
+        type(CSR_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(CSR_sp_type) :: c
+        end function
+        pure module function sparse_add_CSR_dp(a, b) result(c)
+        type(CSR_dp_type), intent(in) :: a, b
+        type(CSR_dp_type) :: c
+        end function
+
+        pure module function sparse_add_CSR_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(CSR_dp_type), intent(in) :: b
+        type(CSR_dp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_CSR_dp(a, b) result(c)
+        type(CSR_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(CSR_dp_type) :: c
+        end function
+        pure module function sparse_add_CSR_csp(a, b) result(c)
+        type(CSR_csp_type), intent(in) :: a, b
+        type(CSR_csp_type) :: c
+        end function
+
+        pure module function sparse_add_CSR_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(CSR_csp_type), intent(in) :: b
+        type(CSR_csp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_CSR_csp(a, b) result(c)
+        type(CSR_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(CSR_csp_type) :: c
+        end function
+        pure module function sparse_add_CSR_cdp(a, b) result(c)
+        type(CSR_cdp_type), intent(in) :: a, b
+        type(CSR_cdp_type) :: c
+        end function
+
+        pure module function sparse_add_CSR_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(CSR_cdp_type), intent(in) :: b
+        type(CSR_cdp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_CSR_cdp(a, b) result(c)
+        type(CSR_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(CSR_cdp_type) :: c
+        end function
+        pure module function sparse_add_CSC_sp(a, b) result(c)
+        type(CSC_sp_type), intent(in) :: a, b
+        type(CSC_sp_type) :: c
+        end function
+
+        pure module function sparse_add_CSC_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(CSC_sp_type), intent(in) :: b
+        type(CSC_sp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_CSC_sp(a, b) result(c)
+        type(CSC_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(CSC_sp_type) :: c
+        end function
+        pure module function sparse_add_CSC_dp(a, b) result(c)
+        type(CSC_dp_type), intent(in) :: a, b
+        type(CSC_dp_type) :: c
+        end function
+
+        pure module function sparse_add_CSC_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(CSC_dp_type), intent(in) :: b
+        type(CSC_dp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_CSC_dp(a, b) result(c)
+        type(CSC_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(CSC_dp_type) :: c
+        end function
+        pure module function sparse_add_CSC_csp(a, b) result(c)
+        type(CSC_csp_type), intent(in) :: a, b
+        type(CSC_csp_type) :: c
+        end function
+
+        pure module function sparse_add_CSC_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(CSC_csp_type), intent(in) :: b
+        type(CSC_csp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_CSC_csp(a, b) result(c)
+        type(CSC_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(CSC_csp_type) :: c
+        end function
+        pure module function sparse_add_CSC_cdp(a, b) result(c)
+        type(CSC_cdp_type), intent(in) :: a, b
+        type(CSC_cdp_type) :: c
+        end function
+
+        pure module function sparse_add_CSC_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(CSC_cdp_type), intent(in) :: b
+        type(CSC_cdp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_CSC_cdp(a, b) result(c)
+        type(CSC_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(CSC_cdp_type) :: c
+        end function
+        pure module function sparse_add_ELL_sp(a, b) result(c)
+        type(ELL_sp_type), intent(in) :: a, b
+        type(ELL_sp_type) :: c
+        end function
+
+        pure module function sparse_add_ELL_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(ELL_sp_type), intent(in) :: b
+        type(ELL_sp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_ELL_sp(a, b) result(c)
+        type(ELL_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(ELL_sp_type) :: c
+        end function
+        pure module function sparse_add_ELL_dp(a, b) result(c)
+        type(ELL_dp_type), intent(in) :: a, b
+        type(ELL_dp_type) :: c
+        end function
+
+        pure module function sparse_add_ELL_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(ELL_dp_type), intent(in) :: b
+        type(ELL_dp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_ELL_dp(a, b) result(c)
+        type(ELL_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(ELL_dp_type) :: c
+        end function
+        pure module function sparse_add_ELL_csp(a, b) result(c)
+        type(ELL_csp_type), intent(in) :: a, b
+        type(ELL_csp_type) :: c
+        end function
+
+        pure module function sparse_add_ELL_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(ELL_csp_type), intent(in) :: b
+        type(ELL_csp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_ELL_csp(a, b) result(c)
+        type(ELL_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(ELL_csp_type) :: c
+        end function
+        pure module function sparse_add_ELL_cdp(a, b) result(c)
+        type(ELL_cdp_type), intent(in) :: a, b
+        type(ELL_cdp_type) :: c
+        end function
+
+        pure module function sparse_add_ELL_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(ELL_cdp_type), intent(in) :: b
+        type(ELL_cdp_type) :: c
+        end function
+
+        pure module function sparse_add_scalar_ELL_cdp(a, b) result(c)
+        type(ELL_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(ELL_cdp_type) :: c
+        end function
+    end interface
+
+    !! Overload the `-` operator for sparse matrices
+    !! [Specifications](../page/specs/stdlib_sparse.html#operators)    
+    interface operator(-)
+        pure module function sparse_sub_COO_sp(a, b) result(c)
+        type(COO_sp_type), intent(in) :: a, b
+        type(COO_sp_type) :: c
+        end function
+
+        pure module function sparse_sub_COO_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(COO_sp_type), intent(in) :: b
+        type(COO_sp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_COO_sp(a, b) result(c)
+        type(COO_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(COO_sp_type) :: c
+        end function
+        pure module function sparse_sub_COO_dp(a, b) result(c)
+        type(COO_dp_type), intent(in) :: a, b
+        type(COO_dp_type) :: c
+        end function
+
+        pure module function sparse_sub_COO_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(COO_dp_type), intent(in) :: b
+        type(COO_dp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_COO_dp(a, b) result(c)
+        type(COO_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(COO_dp_type) :: c
+        end function
+        pure module function sparse_sub_COO_csp(a, b) result(c)
+        type(COO_csp_type), intent(in) :: a, b
+        type(COO_csp_type) :: c
+        end function
+
+        pure module function sparse_sub_COO_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(COO_csp_type), intent(in) :: b
+        type(COO_csp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_COO_csp(a, b) result(c)
+        type(COO_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(COO_csp_type) :: c
+        end function
+        pure module function sparse_sub_COO_cdp(a, b) result(c)
+        type(COO_cdp_type), intent(in) :: a, b
+        type(COO_cdp_type) :: c
+        end function
+
+        pure module function sparse_sub_COO_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(COO_cdp_type), intent(in) :: b
+        type(COO_cdp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_COO_cdp(a, b) result(c)
+        type(COO_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(COO_cdp_type) :: c
+        end function
+        pure module function sparse_sub_CSR_sp(a, b) result(c)
+        type(CSR_sp_type), intent(in) :: a, b
+        type(CSR_sp_type) :: c
+        end function
+
+        pure module function sparse_sub_CSR_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(CSR_sp_type), intent(in) :: b
+        type(CSR_sp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_CSR_sp(a, b) result(c)
+        type(CSR_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(CSR_sp_type) :: c
+        end function
+        pure module function sparse_sub_CSR_dp(a, b) result(c)
+        type(CSR_dp_type), intent(in) :: a, b
+        type(CSR_dp_type) :: c
+        end function
+
+        pure module function sparse_sub_CSR_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(CSR_dp_type), intent(in) :: b
+        type(CSR_dp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_CSR_dp(a, b) result(c)
+        type(CSR_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(CSR_dp_type) :: c
+        end function
+        pure module function sparse_sub_CSR_csp(a, b) result(c)
+        type(CSR_csp_type), intent(in) :: a, b
+        type(CSR_csp_type) :: c
+        end function
+
+        pure module function sparse_sub_CSR_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(CSR_csp_type), intent(in) :: b
+        type(CSR_csp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_CSR_csp(a, b) result(c)
+        type(CSR_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(CSR_csp_type) :: c
+        end function
+        pure module function sparse_sub_CSR_cdp(a, b) result(c)
+        type(CSR_cdp_type), intent(in) :: a, b
+        type(CSR_cdp_type) :: c
+        end function
+
+        pure module function sparse_sub_CSR_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(CSR_cdp_type), intent(in) :: b
+        type(CSR_cdp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_CSR_cdp(a, b) result(c)
+        type(CSR_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(CSR_cdp_type) :: c
+        end function
+        pure module function sparse_sub_CSC_sp(a, b) result(c)
+        type(CSC_sp_type), intent(in) :: a, b
+        type(CSC_sp_type) :: c
+        end function
+
+        pure module function sparse_sub_CSC_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(CSC_sp_type), intent(in) :: b
+        type(CSC_sp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_CSC_sp(a, b) result(c)
+        type(CSC_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(CSC_sp_type) :: c
+        end function
+        pure module function sparse_sub_CSC_dp(a, b) result(c)
+        type(CSC_dp_type), intent(in) :: a, b
+        type(CSC_dp_type) :: c
+        end function
+
+        pure module function sparse_sub_CSC_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(CSC_dp_type), intent(in) :: b
+        type(CSC_dp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_CSC_dp(a, b) result(c)
+        type(CSC_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(CSC_dp_type) :: c
+        end function
+        pure module function sparse_sub_CSC_csp(a, b) result(c)
+        type(CSC_csp_type), intent(in) :: a, b
+        type(CSC_csp_type) :: c
+        end function
+
+        pure module function sparse_sub_CSC_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(CSC_csp_type), intent(in) :: b
+        type(CSC_csp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_CSC_csp(a, b) result(c)
+        type(CSC_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(CSC_csp_type) :: c
+        end function
+        pure module function sparse_sub_CSC_cdp(a, b) result(c)
+        type(CSC_cdp_type), intent(in) :: a, b
+        type(CSC_cdp_type) :: c
+        end function
+
+        pure module function sparse_sub_CSC_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(CSC_cdp_type), intent(in) :: b
+        type(CSC_cdp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_CSC_cdp(a, b) result(c)
+        type(CSC_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(CSC_cdp_type) :: c
+        end function
+        pure module function sparse_sub_ELL_sp(a, b) result(c)
+        type(ELL_sp_type), intent(in) :: a, b
+        type(ELL_sp_type) :: c
+        end function
+
+        pure module function sparse_sub_ELL_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(ELL_sp_type), intent(in) :: b
+        type(ELL_sp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_ELL_sp(a, b) result(c)
+        type(ELL_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(ELL_sp_type) :: c
+        end function
+        pure module function sparse_sub_ELL_dp(a, b) result(c)
+        type(ELL_dp_type), intent(in) :: a, b
+        type(ELL_dp_type) :: c
+        end function
+
+        pure module function sparse_sub_ELL_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(ELL_dp_type), intent(in) :: b
+        type(ELL_dp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_ELL_dp(a, b) result(c)
+        type(ELL_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(ELL_dp_type) :: c
+        end function
+        pure module function sparse_sub_ELL_csp(a, b) result(c)
+        type(ELL_csp_type), intent(in) :: a, b
+        type(ELL_csp_type) :: c
+        end function
+
+        pure module function sparse_sub_ELL_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(ELL_csp_type), intent(in) :: b
+        type(ELL_csp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_ELL_csp(a, b) result(c)
+        type(ELL_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(ELL_csp_type) :: c
+        end function
+        pure module function sparse_sub_ELL_cdp(a, b) result(c)
+        type(ELL_cdp_type), intent(in) :: a, b
+        type(ELL_cdp_type) :: c
+        end function
+
+        pure module function sparse_sub_ELL_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(ELL_cdp_type), intent(in) :: b
+        type(ELL_cdp_type) :: c
+        end function
+
+        pure module function sparse_sub_scalar_ELL_cdp(a, b) result(c)
+        type(ELL_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(ELL_cdp_type) :: c
+        end function
+    end interface
+
+    !! Overload the `*` operator for sparse matrices
+    !! [Specifications](../page/specs/stdlib_sparse.html#operators)    
+    interface operator(*)
+        pure module function sparse_mul_COO_sp(a, b) result(c)
+        type(COO_sp_type), intent(in) :: a, b
+        type(COO_sp_type) :: c
+        end function
+
+        pure module function sparse_mul_COO_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(COO_sp_type), intent(in) :: b
+        type(COO_sp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_COO_sp(a, b) result(c)
+        type(COO_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(COO_sp_type) :: c
+        end function
+        pure module function sparse_mul_COO_dp(a, b) result(c)
+        type(COO_dp_type), intent(in) :: a, b
+        type(COO_dp_type) :: c
+        end function
+
+        pure module function sparse_mul_COO_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(COO_dp_type), intent(in) :: b
+        type(COO_dp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_COO_dp(a, b) result(c)
+        type(COO_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(COO_dp_type) :: c
+        end function
+        pure module function sparse_mul_COO_csp(a, b) result(c)
+        type(COO_csp_type), intent(in) :: a, b
+        type(COO_csp_type) :: c
+        end function
+
+        pure module function sparse_mul_COO_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(COO_csp_type), intent(in) :: b
+        type(COO_csp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_COO_csp(a, b) result(c)
+        type(COO_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(COO_csp_type) :: c
+        end function
+        pure module function sparse_mul_COO_cdp(a, b) result(c)
+        type(COO_cdp_type), intent(in) :: a, b
+        type(COO_cdp_type) :: c
+        end function
+
+        pure module function sparse_mul_COO_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(COO_cdp_type), intent(in) :: b
+        type(COO_cdp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_COO_cdp(a, b) result(c)
+        type(COO_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(COO_cdp_type) :: c
+        end function
+        pure module function sparse_mul_CSR_sp(a, b) result(c)
+        type(CSR_sp_type), intent(in) :: a, b
+        type(CSR_sp_type) :: c
+        end function
+
+        pure module function sparse_mul_CSR_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(CSR_sp_type), intent(in) :: b
+        type(CSR_sp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_CSR_sp(a, b) result(c)
+        type(CSR_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(CSR_sp_type) :: c
+        end function
+        pure module function sparse_mul_CSR_dp(a, b) result(c)
+        type(CSR_dp_type), intent(in) :: a, b
+        type(CSR_dp_type) :: c
+        end function
+
+        pure module function sparse_mul_CSR_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(CSR_dp_type), intent(in) :: b
+        type(CSR_dp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_CSR_dp(a, b) result(c)
+        type(CSR_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(CSR_dp_type) :: c
+        end function
+        pure module function sparse_mul_CSR_csp(a, b) result(c)
+        type(CSR_csp_type), intent(in) :: a, b
+        type(CSR_csp_type) :: c
+        end function
+
+        pure module function sparse_mul_CSR_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(CSR_csp_type), intent(in) :: b
+        type(CSR_csp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_CSR_csp(a, b) result(c)
+        type(CSR_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(CSR_csp_type) :: c
+        end function
+        pure module function sparse_mul_CSR_cdp(a, b) result(c)
+        type(CSR_cdp_type), intent(in) :: a, b
+        type(CSR_cdp_type) :: c
+        end function
+
+        pure module function sparse_mul_CSR_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(CSR_cdp_type), intent(in) :: b
+        type(CSR_cdp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_CSR_cdp(a, b) result(c)
+        type(CSR_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(CSR_cdp_type) :: c
+        end function
+        pure module function sparse_mul_CSC_sp(a, b) result(c)
+        type(CSC_sp_type), intent(in) :: a, b
+        type(CSC_sp_type) :: c
+        end function
+
+        pure module function sparse_mul_CSC_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(CSC_sp_type), intent(in) :: b
+        type(CSC_sp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_CSC_sp(a, b) result(c)
+        type(CSC_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(CSC_sp_type) :: c
+        end function
+        pure module function sparse_mul_CSC_dp(a, b) result(c)
+        type(CSC_dp_type), intent(in) :: a, b
+        type(CSC_dp_type) :: c
+        end function
+
+        pure module function sparse_mul_CSC_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(CSC_dp_type), intent(in) :: b
+        type(CSC_dp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_CSC_dp(a, b) result(c)
+        type(CSC_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(CSC_dp_type) :: c
+        end function
+        pure module function sparse_mul_CSC_csp(a, b) result(c)
+        type(CSC_csp_type), intent(in) :: a, b
+        type(CSC_csp_type) :: c
+        end function
+
+        pure module function sparse_mul_CSC_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(CSC_csp_type), intent(in) :: b
+        type(CSC_csp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_CSC_csp(a, b) result(c)
+        type(CSC_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(CSC_csp_type) :: c
+        end function
+        pure module function sparse_mul_CSC_cdp(a, b) result(c)
+        type(CSC_cdp_type), intent(in) :: a, b
+        type(CSC_cdp_type) :: c
+        end function
+
+        pure module function sparse_mul_CSC_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(CSC_cdp_type), intent(in) :: b
+        type(CSC_cdp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_CSC_cdp(a, b) result(c)
+        type(CSC_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(CSC_cdp_type) :: c
+        end function
+        pure module function sparse_mul_ELL_sp(a, b) result(c)
+        type(ELL_sp_type), intent(in) :: a, b
+        type(ELL_sp_type) :: c
+        end function
+
+        pure module function sparse_mul_ELL_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(ELL_sp_type), intent(in) :: b
+        type(ELL_sp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_ELL_sp(a, b) result(c)
+        type(ELL_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(ELL_sp_type) :: c
+        end function
+        pure module function sparse_mul_ELL_dp(a, b) result(c)
+        type(ELL_dp_type), intent(in) :: a, b
+        type(ELL_dp_type) :: c
+        end function
+
+        pure module function sparse_mul_ELL_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(ELL_dp_type), intent(in) :: b
+        type(ELL_dp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_ELL_dp(a, b) result(c)
+        type(ELL_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(ELL_dp_type) :: c
+        end function
+        pure module function sparse_mul_ELL_csp(a, b) result(c)
+        type(ELL_csp_type), intent(in) :: a, b
+        type(ELL_csp_type) :: c
+        end function
+
+        pure module function sparse_mul_ELL_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(ELL_csp_type), intent(in) :: b
+        type(ELL_csp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_ELL_csp(a, b) result(c)
+        type(ELL_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(ELL_csp_type) :: c
+        end function
+        pure module function sparse_mul_ELL_cdp(a, b) result(c)
+        type(ELL_cdp_type), intent(in) :: a, b
+        type(ELL_cdp_type) :: c
+        end function
+
+        pure module function sparse_mul_ELL_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(ELL_cdp_type), intent(in) :: b
+        type(ELL_cdp_type) :: c
+        end function
+
+        pure module function sparse_mul_scalar_ELL_cdp(a, b) result(c)
+        type(ELL_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(ELL_cdp_type) :: c
+        end function
+    end interface
+
+    !! Overload the `/` operator for sparse matrices
+    !! [Specifications](../page/specs/stdlib_sparse.html#operators)    
+    interface operator(/)
+        pure module function sparse_div_COO_sp(a, b) result(c)
+        type(COO_sp_type), intent(in) :: a, b
+        type(COO_sp_type) :: c
+        end function
+
+        pure module function sparse_div_COO_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(COO_sp_type), intent(in) :: b
+        type(COO_sp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_COO_sp(a, b) result(c)
+        type(COO_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(COO_sp_type) :: c
+        end function
+        pure module function sparse_div_COO_dp(a, b) result(c)
+        type(COO_dp_type), intent(in) :: a, b
+        type(COO_dp_type) :: c
+        end function
+
+        pure module function sparse_div_COO_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(COO_dp_type), intent(in) :: b
+        type(COO_dp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_COO_dp(a, b) result(c)
+        type(COO_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(COO_dp_type) :: c
+        end function
+        pure module function sparse_div_COO_csp(a, b) result(c)
+        type(COO_csp_type), intent(in) :: a, b
+        type(COO_csp_type) :: c
+        end function
+
+        pure module function sparse_div_COO_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(COO_csp_type), intent(in) :: b
+        type(COO_csp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_COO_csp(a, b) result(c)
+        type(COO_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(COO_csp_type) :: c
+        end function
+        pure module function sparse_div_COO_cdp(a, b) result(c)
+        type(COO_cdp_type), intent(in) :: a, b
+        type(COO_cdp_type) :: c
+        end function
+
+        pure module function sparse_div_COO_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(COO_cdp_type), intent(in) :: b
+        type(COO_cdp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_COO_cdp(a, b) result(c)
+        type(COO_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(COO_cdp_type) :: c
+        end function
+        pure module function sparse_div_CSR_sp(a, b) result(c)
+        type(CSR_sp_type), intent(in) :: a, b
+        type(CSR_sp_type) :: c
+        end function
+
+        pure module function sparse_div_CSR_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(CSR_sp_type), intent(in) :: b
+        type(CSR_sp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_CSR_sp(a, b) result(c)
+        type(CSR_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(CSR_sp_type) :: c
+        end function
+        pure module function sparse_div_CSR_dp(a, b) result(c)
+        type(CSR_dp_type), intent(in) :: a, b
+        type(CSR_dp_type) :: c
+        end function
+
+        pure module function sparse_div_CSR_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(CSR_dp_type), intent(in) :: b
+        type(CSR_dp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_CSR_dp(a, b) result(c)
+        type(CSR_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(CSR_dp_type) :: c
+        end function
+        pure module function sparse_div_CSR_csp(a, b) result(c)
+        type(CSR_csp_type), intent(in) :: a, b
+        type(CSR_csp_type) :: c
+        end function
+
+        pure module function sparse_div_CSR_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(CSR_csp_type), intent(in) :: b
+        type(CSR_csp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_CSR_csp(a, b) result(c)
+        type(CSR_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(CSR_csp_type) :: c
+        end function
+        pure module function sparse_div_CSR_cdp(a, b) result(c)
+        type(CSR_cdp_type), intent(in) :: a, b
+        type(CSR_cdp_type) :: c
+        end function
+
+        pure module function sparse_div_CSR_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(CSR_cdp_type), intent(in) :: b
+        type(CSR_cdp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_CSR_cdp(a, b) result(c)
+        type(CSR_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(CSR_cdp_type) :: c
+        end function
+        pure module function sparse_div_CSC_sp(a, b) result(c)
+        type(CSC_sp_type), intent(in) :: a, b
+        type(CSC_sp_type) :: c
+        end function
+
+        pure module function sparse_div_CSC_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(CSC_sp_type), intent(in) :: b
+        type(CSC_sp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_CSC_sp(a, b) result(c)
+        type(CSC_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(CSC_sp_type) :: c
+        end function
+        pure module function sparse_div_CSC_dp(a, b) result(c)
+        type(CSC_dp_type), intent(in) :: a, b
+        type(CSC_dp_type) :: c
+        end function
+
+        pure module function sparse_div_CSC_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(CSC_dp_type), intent(in) :: b
+        type(CSC_dp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_CSC_dp(a, b) result(c)
+        type(CSC_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(CSC_dp_type) :: c
+        end function
+        pure module function sparse_div_CSC_csp(a, b) result(c)
+        type(CSC_csp_type), intent(in) :: a, b
+        type(CSC_csp_type) :: c
+        end function
+
+        pure module function sparse_div_CSC_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(CSC_csp_type), intent(in) :: b
+        type(CSC_csp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_CSC_csp(a, b) result(c)
+        type(CSC_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(CSC_csp_type) :: c
+        end function
+        pure module function sparse_div_CSC_cdp(a, b) result(c)
+        type(CSC_cdp_type), intent(in) :: a, b
+        type(CSC_cdp_type) :: c
+        end function
+
+        pure module function sparse_div_CSC_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(CSC_cdp_type), intent(in) :: b
+        type(CSC_cdp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_CSC_cdp(a, b) result(c)
+        type(CSC_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(CSC_cdp_type) :: c
+        end function
+        pure module function sparse_div_ELL_sp(a, b) result(c)
+        type(ELL_sp_type), intent(in) :: a, b
+        type(ELL_sp_type) :: c
+        end function
+
+        pure module function sparse_div_ELL_scalar_sp(a, b) result(c)
+        real(sp), intent(in) :: a
+        type(ELL_sp_type), intent(in) :: b
+        type(ELL_sp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_ELL_sp(a, b) result(c)
+        type(ELL_sp_type), intent(in) :: a
+        real(sp), intent(in) :: b
+        type(ELL_sp_type) :: c
+        end function
+        pure module function sparse_div_ELL_dp(a, b) result(c)
+        type(ELL_dp_type), intent(in) :: a, b
+        type(ELL_dp_type) :: c
+        end function
+
+        pure module function sparse_div_ELL_scalar_dp(a, b) result(c)
+        real(dp), intent(in) :: a
+        type(ELL_dp_type), intent(in) :: b
+        type(ELL_dp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_ELL_dp(a, b) result(c)
+        type(ELL_dp_type), intent(in) :: a
+        real(dp), intent(in) :: b
+        type(ELL_dp_type) :: c
+        end function
+        pure module function sparse_div_ELL_csp(a, b) result(c)
+        type(ELL_csp_type), intent(in) :: a, b
+        type(ELL_csp_type) :: c
+        end function
+
+        pure module function sparse_div_ELL_scalar_csp(a, b) result(c)
+        complex(sp), intent(in) :: a
+        type(ELL_csp_type), intent(in) :: b
+        type(ELL_csp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_ELL_csp(a, b) result(c)
+        type(ELL_csp_type), intent(in) :: a
+        complex(sp), intent(in) :: b
+        type(ELL_csp_type) :: c
+        end function
+        pure module function sparse_div_ELL_cdp(a, b) result(c)
+        type(ELL_cdp_type), intent(in) :: a, b
+        type(ELL_cdp_type) :: c
+        end function
+
+        pure module function sparse_div_ELL_scalar_cdp(a, b) result(c)
+        complex(dp), intent(in) :: a
+        type(ELL_cdp_type), intent(in) :: b
+        type(ELL_cdp_type) :: c
+        end function
+
+        pure module function sparse_div_scalar_ELL_cdp(a, b) result(c)
+        type(ELL_cdp_type), intent(in) :: a
+        complex(dp), intent(in) :: b
+        type(ELL_cdp_type) :: c
+        end function
+    end interface
+
 
 contains
 
@@ -513,11 +1561,16 @@ contains
     ! data accessors
     !==================================================================
 
+    logical(c_bool) elemental function skip(sym,row,col)
+        integer(ilp), intent(in) :: sym, row, col
+        skip = (sym == sparse_lower .and. row < col) .or. (sym == sparse_upper .and. row > col)
+    end function
+
     pure real(sp) function at_value_coo_sp(self,ik,jk) result(val)
         class(COO_sp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._sp , ieee_quiet_nan)
@@ -555,14 +1608,18 @@ contains
         class(COO_sp_type), intent(inout) :: self
         real(sp), intent(in) :: val(:,:)
         integer(ilp), intent(in) :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do k = 1, self%nnz
             do i = 1, size(ik)
-                if( ik(i) /= self%index(1,k) ) cycle
+                row = ik(i)
+                if( row /= self%index(1,k) ) cycle
                 do j = 1, size(jk)
-                    if( jk(j) /= self%index(2,k) ) cycle
+                    col = jk(j)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col /= self%index(2,k) ) cycle
                     self%data(k) = self%data(k) + val(i,j)
+                    exit
                 end do
             end do
         end do
@@ -572,7 +1629,7 @@ contains
         class(COO_dp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._dp , ieee_quiet_nan)
@@ -610,14 +1667,18 @@ contains
         class(COO_dp_type), intent(inout) :: self
         real(dp), intent(in) :: val(:,:)
         integer(ilp), intent(in) :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do k = 1, self%nnz
             do i = 1, size(ik)
-                if( ik(i) /= self%index(1,k) ) cycle
+                row = ik(i)
+                if( row /= self%index(1,k) ) cycle
                 do j = 1, size(jk)
-                    if( jk(j) /= self%index(2,k) ) cycle
+                    col = jk(j)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col /= self%index(2,k) ) cycle
                     self%data(k) = self%data(k) + val(i,j)
+                    exit
                 end do
             end do
         end do
@@ -627,7 +1688,7 @@ contains
         class(COO_csp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._sp , ieee_quiet_nan)
@@ -665,14 +1726,18 @@ contains
         class(COO_csp_type), intent(inout) :: self
         complex(sp), intent(in) :: val(:,:)
         integer(ilp), intent(in) :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do k = 1, self%nnz
             do i = 1, size(ik)
-                if( ik(i) /= self%index(1,k) ) cycle
+                row = ik(i)
+                if( row /= self%index(1,k) ) cycle
                 do j = 1, size(jk)
-                    if( jk(j) /= self%index(2,k) ) cycle
+                    col = jk(j)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col /= self%index(2,k) ) cycle
                     self%data(k) = self%data(k) + val(i,j)
+                    exit
                 end do
             end do
         end do
@@ -682,7 +1747,7 @@ contains
         class(COO_cdp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._dp , ieee_quiet_nan)
@@ -720,14 +1785,18 @@ contains
         class(COO_cdp_type), intent(inout) :: self
         complex(dp), intent(in) :: val(:,:)
         integer(ilp), intent(in) :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do k = 1, self%nnz
             do i = 1, size(ik)
-                if( ik(i) /= self%index(1,k) ) cycle
+                row = ik(i)
+                if( row /= self%index(1,k) ) cycle
                 do j = 1, size(jk)
-                    if( jk(j) /= self%index(2,k) ) cycle
+                    col = jk(j)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col /= self%index(2,k) ) cycle
                     self%data(k) = self%data(k) + val(i,j)
+                    exit
                 end do
             end do
         end do
@@ -738,7 +1807,7 @@ contains
         class(CSR_sp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._sp , ieee_quiet_nan)
@@ -776,13 +1845,17 @@ contains
         class(CSR_sp_type), intent(inout) :: self
         real(sp), intent(in) :: val(:,:)
         integer(ilp), intent(in) :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do i = 1, size(ik)
-            do k = self%rowptr(ik(i)), self%rowptr(ik(i)+1)-1
+            row = ik(i)
+            do k = self%rowptr(row), self%rowptr(row+1)-1
                 do j = 1, size(jk)
-                    if( jk(j) == self%col(k) ) then
+                    col = jk(j)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%col(k) ) then
                         self%data(k) = self%data(k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -793,7 +1866,7 @@ contains
         class(CSR_dp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._dp , ieee_quiet_nan)
@@ -831,13 +1904,17 @@ contains
         class(CSR_dp_type), intent(inout) :: self
         real(dp), intent(in) :: val(:,:)
         integer(ilp), intent(in) :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do i = 1, size(ik)
-            do k = self%rowptr(ik(i)), self%rowptr(ik(i)+1)-1
+            row = ik(i)
+            do k = self%rowptr(row), self%rowptr(row+1)-1
                 do j = 1, size(jk)
-                    if( jk(j) == self%col(k) ) then
+                    col = jk(j)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%col(k) ) then
                         self%data(k) = self%data(k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -848,7 +1925,7 @@ contains
         class(CSR_csp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._sp , ieee_quiet_nan)
@@ -886,13 +1963,17 @@ contains
         class(CSR_csp_type), intent(inout) :: self
         complex(sp), intent(in) :: val(:,:)
         integer(ilp), intent(in) :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do i = 1, size(ik)
-            do k = self%rowptr(ik(i)), self%rowptr(ik(i)+1)-1
+            row = ik(i)
+            do k = self%rowptr(row), self%rowptr(row+1)-1
                 do j = 1, size(jk)
-                    if( jk(j) == self%col(k) ) then
+                    col = jk(j)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%col(k) ) then
                         self%data(k) = self%data(k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -903,7 +1984,7 @@ contains
         class(CSR_cdp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._dp , ieee_quiet_nan)
@@ -941,13 +2022,17 @@ contains
         class(CSR_cdp_type), intent(inout) :: self
         complex(dp), intent(in) :: val(:,:)
         integer(ilp), intent(in) :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do i = 1, size(ik)
-            do k = self%rowptr(ik(i)), self%rowptr(ik(i)+1)-1
+            row = ik(i)
+            do k = self%rowptr(row), self%rowptr(row+1)-1
                 do j = 1, size(jk)
-                    if( jk(j) == self%col(k) ) then
+                    col = jk(j)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%col(k) ) then
                         self%data(k) = self%data(k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -959,7 +2044,7 @@ contains
         class(CSC_sp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._sp , ieee_quiet_nan)
@@ -997,13 +2082,17 @@ contains
         class(CSC_sp_type), intent(inout) :: self
         real(sp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do j = 1, size(jk)
-            do k = self%colptr(jk(j)), self%colptr(jk(j)+1)-1
+            col = jk(j)
+            do k = self%colptr(col), self%colptr(col+1)-1
                 do i = 1, size(ik)
-                    if( ik(i) == self%row(k) ) then
+                    row = ik(i)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( row == self%row(k) ) then
                         self%data(k) = self%data(k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1014,7 +2103,7 @@ contains
         class(CSC_dp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._dp , ieee_quiet_nan)
@@ -1052,13 +2141,17 @@ contains
         class(CSC_dp_type), intent(inout) :: self
         real(dp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do j = 1, size(jk)
-            do k = self%colptr(jk(j)), self%colptr(jk(j)+1)-1
+            col = jk(j)
+            do k = self%colptr(col), self%colptr(col+1)-1
                 do i = 1, size(ik)
-                    if( ik(i) == self%row(k) ) then
+                    row = ik(i)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( row == self%row(k) ) then
                         self%data(k) = self%data(k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1069,7 +2162,7 @@ contains
         class(CSC_csp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._sp , ieee_quiet_nan)
@@ -1107,13 +2200,17 @@ contains
         class(CSC_csp_type), intent(inout) :: self
         complex(sp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do j = 1, size(jk)
-            do k = self%colptr(jk(j)), self%colptr(jk(j)+1)-1
+            col = jk(j)
+            do k = self%colptr(col), self%colptr(col+1)-1
                 do i = 1, size(ik)
-                    if( ik(i) == self%row(k) ) then
+                    row = ik(i)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( row == self%row(k) ) then
                         self%data(k) = self%data(k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1124,7 +2221,7 @@ contains
         class(CSC_cdp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._dp , ieee_quiet_nan)
@@ -1162,13 +2259,17 @@ contains
         class(CSC_cdp_type), intent(inout) :: self
         complex(dp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do j = 1, size(jk)
-            do k = self%colptr(jk(j)), self%colptr(jk(j)+1)-1
+            col = jk(j)
+            do k = self%colptr(col), self%colptr(col+1)-1
                 do i = 1, size(ik)
-                    if( ik(i) == self%row(k) ) then
+                    row = ik(i)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( row == self%row(k) ) then
                         self%data(k) = self%data(k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1180,7 +2281,7 @@ contains
         class(ELL_sp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._sp , ieee_quiet_nan)
@@ -1218,13 +2319,17 @@ contains
         class(ELL_sp_type), intent(inout) :: self
         real(sp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do k = 1 , self%K
             do j = 1, size(jk)
+                col = jk(j)
                 do i = 1, size(ik)
-                    if( jk(j) == self%index(ik(i),k) ) then
-                        self%data(ik(i),k) = self%data(ik(i),k) + val(i,j)
+                    row = ik(i)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%index(row,k) ) then
+                        self%data(row,k) = self%data(row,k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1235,7 +2340,7 @@ contains
         class(ELL_dp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._dp , ieee_quiet_nan)
@@ -1273,13 +2378,17 @@ contains
         class(ELL_dp_type), intent(inout) :: self
         real(dp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do k = 1 , self%K
             do j = 1, size(jk)
+                col = jk(j)
                 do i = 1, size(ik)
-                    if( jk(j) == self%index(ik(i),k) ) then
-                        self%data(ik(i),k) = self%data(ik(i),k) + val(i,j)
+                    row = ik(i)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%index(row,k) ) then
+                        self%data(row,k) = self%data(row,k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1290,7 +2399,7 @@ contains
         class(ELL_csp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._sp , ieee_quiet_nan)
@@ -1328,13 +2437,17 @@ contains
         class(ELL_csp_type), intent(inout) :: self
         complex(sp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do k = 1 , self%K
             do j = 1, size(jk)
+                col = jk(j)
                 do i = 1, size(ik)
-                    if( jk(j) == self%index(ik(i),k) ) then
-                        self%data(ik(i),k) = self%data(ik(i),k) + val(i,j)
+                    row = ik(i)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%index(row,k) ) then
+                        self%data(row,k) = self%data(row,k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1345,7 +2458,7 @@ contains
         class(ELL_cdp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._dp , ieee_quiet_nan)
@@ -1383,13 +2496,17 @@ contains
         class(ELL_cdp_type), intent(inout) :: self
         complex(dp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j
+        integer(ilp) :: k, i, j, row, col
         ! naive implementation
         do k = 1 , self%K
             do j = 1, size(jk)
+                col = jk(j)
                 do i = 1, size(ik)
-                    if( jk(j) == self%index(ik(i),k) ) then
-                        self%data(ik(i),k) = self%data(ik(i),k) + val(i,j)
+                    row = ik(i)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%index(row,k) ) then
+                        self%data(row,k) = self%data(row,k) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1401,7 +2518,7 @@ contains
         class(SELLC_sp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_, idx
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._sp , ieee_quiet_nan)
@@ -1442,14 +2559,18 @@ contains
         class(SELLC_sp_type), intent(inout) :: self
         real(sp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j, idx
+        integer(ilp) :: k, i, j, idx, row, col
         ! naive implementation
         do k = 1 , self%chunk_size
             do j = 1, size(jk)
+                col = jk(j)
                 do i = 1, size(ik)
-                    idx = self%rowptr((ik(i) - 1)/self%chunk_size + 1)
-                    if( jk(j) == self%col(k,idx) ) then
+                    row = ik(i)
+                    idx = self%rowptr((row - 1)/self%chunk_size + 1)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%col(k,idx) ) then
                         self%data(k,idx) = self%data(k,idx) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1460,7 +2581,7 @@ contains
         class(SELLC_dp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_, idx
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._dp , ieee_quiet_nan)
@@ -1501,14 +2622,18 @@ contains
         class(SELLC_dp_type), intent(inout) :: self
         real(dp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j, idx
+        integer(ilp) :: k, i, j, idx, row, col
         ! naive implementation
         do k = 1 , self%chunk_size
             do j = 1, size(jk)
+                col = jk(j)
                 do i = 1, size(ik)
-                    idx = self%rowptr((ik(i) - 1)/self%chunk_size + 1)
-                    if( jk(j) == self%col(k,idx) ) then
+                    row = ik(i)
+                    idx = self%rowptr((row - 1)/self%chunk_size + 1)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%col(k,idx) ) then
                         self%data(k,idx) = self%data(k,idx) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1519,7 +2644,7 @@ contains
         class(SELLC_csp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_, idx
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._sp , ieee_quiet_nan)
@@ -1560,14 +2685,18 @@ contains
         class(SELLC_csp_type), intent(inout) :: self
         complex(sp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j, idx
+        integer(ilp) :: k, i, j, idx, row, col
         ! naive implementation
         do k = 1 , self%chunk_size
             do j = 1, size(jk)
+                col = jk(j)
                 do i = 1, size(ik)
-                    idx = self%rowptr((ik(i) - 1)/self%chunk_size + 1)
-                    if( jk(j) == self%col(k,idx) ) then
+                    row = ik(i)
+                    idx = self%rowptr((row - 1)/self%chunk_size + 1)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%col(k,idx) ) then
                         self%data(k,idx) = self%data(k,idx) + val(i,j)
+                        exit
                     end if
                 end do
             end do
@@ -1578,7 +2707,7 @@ contains
         class(SELLC_cdp_type), intent(in) :: self
         integer(ilp), intent(in) :: ik, jk
         integer(ilp) :: k, ik_, jk_, idx
-        logical :: transpose
+        logical(c_bool) :: transpose
         ! naive implementation
         if( (ik<1 .or. ik>self%nrows) .or. (jk<1 .or. jk>self%ncols) ) then
             val = ieee_value( 0._dp , ieee_quiet_nan)
@@ -1619,19 +2748,23 @@ contains
         class(SELLC_cdp_type), intent(inout) :: self
         complex(dp), intent(in) :: val(:,:)
         integer(ilp), intent(in)  :: ik(:), jk(:)
-        integer(ilp) :: k, i, j, idx
+        integer(ilp) :: k, i, j, idx, row, col
         ! naive implementation
         do k = 1 , self%chunk_size
             do j = 1, size(jk)
+                col = jk(j)
                 do i = 1, size(ik)
-                    idx = self%rowptr((ik(i) - 1)/self%chunk_size + 1)
-                    if( jk(j) == self%col(k,idx) ) then
+                    row = ik(i)
+                    idx = self%rowptr((row - 1)/self%chunk_size + 1)
+                    if( skip(self%storage,row,col) ) cycle
+                    if( col == self%col(k,idx) ) then
                         self%data(k,idx) = self%data(k,idx) + val(i,j)
+                        exit
                     end if
                 end do
             end do
         end do
     end subroutine
 
-    
+
 end module stdlib_sparse_kinds
